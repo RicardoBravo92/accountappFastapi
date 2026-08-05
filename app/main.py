@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -16,6 +17,9 @@ async def lifespan(app: FastAPI):
     """Application lifespan context manager."""
     try:
         Base.metadata.create_all(bind=engine)
+        
+        # Ensure upload directory exists
+        os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
         
     except SQLAlchemyError as e:
         logger.error(f"Database initialization failed: {str(e)}")

@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 
 class ContactBase(BaseModel):
+    company_id: int
     type: str
     name: str
     email: str | None = None

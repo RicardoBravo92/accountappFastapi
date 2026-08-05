@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 
 class AccountBase(BaseModel):
+    company_id: int
     code: str
     name: str
     type: str
