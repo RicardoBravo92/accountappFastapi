@@ -1,10 +1,8 @@
-from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db, get_current_user
+from app.api.dependencies import get_current_user, get_db
 from app.models.auth.user import User
 from app.models.item import Item
 from app.schemas.item import ItemCreate, ItemResponse, ItemUpdate
@@ -15,7 +13,7 @@ router = APIRouter(prefix="/items", tags=["items"])
 @router.get("/", response_model=list[ItemResponse])
 def list_items(
     company_id: int,
-    category_id: Optional[int] = None,
+    category_id: int | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

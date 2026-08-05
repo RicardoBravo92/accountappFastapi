@@ -1,17 +1,16 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
 
 class ItemBase(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     unit_price: float = 0
-    unit: Optional[str] = None
-    category_id: Optional[int] = None
+    unit: str | None = None
+    category_id: int | None = None
     tax_rate: float = 0
-    sku: Optional[str] = None
+    sku: str | None = None
 
 
 class ItemCreate(ItemBase):
@@ -19,14 +18,14 @@ class ItemCreate(ItemBase):
 
 
 class ItemUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    unit_price: Optional[float] = None
-    unit: Optional[str] = None
-    category_id: Optional[int] = None
-    tax_rate: Optional[float] = None
-    sku: Optional[str] = None
-    is_active: Optional[bool] = None
+    name: str | None = None
+    description: str | None = None
+    unit_price: float | None = None
+    unit: str | None = None
+    category_id: int | None = None
+    tax_rate: float | None = None
+    sku: str | None = None
+    is_active: bool | None = None
 
 
 class ItemResponse(ItemBase):

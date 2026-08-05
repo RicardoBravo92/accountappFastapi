@@ -1,13 +1,15 @@
-from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db, get_current_user
+from app.api.dependencies import get_current_user, get_db
 from app.models.auth.user import User
-from app.models.transaction import Transaction, TransactionType
-from app.schemas.transaction import TransactionCreate, TransactionResponse, TransactionUpdate
+from app.models.transaction import Transaction
+from app.schemas.transaction import (
+    TransactionCreate,
+    TransactionResponse,
+    TransactionUpdate,
+)
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -15,8 +17,8 @@ router = APIRouter(prefix="/transactions", tags=["transactions"])
 @router.get("/", response_model=list[TransactionResponse])
 def list_transactions(
     company_id: int,
-    account_id: Optional[int] = None,
-    type: Optional[str] = None,
+    account_id: int | None = None,
+    type: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

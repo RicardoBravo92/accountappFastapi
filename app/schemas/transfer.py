@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -9,8 +8,8 @@ class TransferBase(BaseModel):
     to_account_id: int
     amount: float
     currency_code: str = "USD"
-    description: Optional[str] = None
-    reference: Optional[str] = None
+    description: str | None = None
+    reference: str | None = None
     transferred_at: datetime
 
 
@@ -19,14 +18,14 @@ class TransferCreate(TransferBase):
 
 
 class TransferUpdate(BaseModel):
-    from_account_id: Optional[int] = None
-    to_account_id: Optional[int] = None
-    amount: Optional[float] = None
-    currency_code: Optional[str] = None
-    description: Optional[str] = None
-    reference: Optional[str] = None
-    transferred_at: Optional[datetime] = None
-    is_reconciled: Optional[bool] = None
+    from_account_id: int | None = None
+    to_account_id: int | None = None
+    amount: float | None = None
+    currency_code: str | None = None
+    description: str | None = None
+    reference: str | None = None
+    transferred_at: datetime | None = None
+    is_reconciled: bool | None = None
 
 
 class TransferResponse(TransferBase):

@@ -1,10 +1,8 @@
-from datetime import datetime
-from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.models.auth.user import User, UserRole
 from app.core.auth import hash_password, verify_password
+from app.models.auth.user import User, UserRole
 
 
 def authenticate_user(db: Session, email: str, password: str) -> User | None:
@@ -41,7 +39,7 @@ def list_users(db: Session, company_id: int) -> list[User]:
     return db.query(User).all()
 
 
-def update_user(db: Session, user_id: int, **data) -> Optional[User]:
+def update_user(db: Session, user_id: int, **data) -> User | None:
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         return None

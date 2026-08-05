@@ -1,12 +1,10 @@
-from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db, get_current_user
+from app.api.dependencies import get_current_user, get_db
+from app.models.account import Account
 from app.models.auth.user import User
-from app.models.account import Account, AccountType
 from app.schemas.account import AccountCreate, AccountResponse, AccountUpdate
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
@@ -15,7 +13,7 @@ router = APIRouter(prefix="/accounts", tags=["accounts"])
 @router.get("/", response_model=list[AccountResponse])
 def list_accounts(
     company_id: int,
-    type: Optional[str] = None,
+    type: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

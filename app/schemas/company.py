@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -7,15 +6,15 @@ from pydantic import BaseModel
 class CompanyBase(BaseModel):
     name: str
     slug: str
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    address: Optional[str] = None
-    city: Optional[str] = None
-    country: Optional[str] = None
-    tax_id: Optional[str] = None
+    email: str | None = None
+    phone: str | None = None
+    address: str | None = None
+    city: str | None = None
+    country: str | None = None
+    tax_id: str | None = None
     currency_code: str = "USD"
     date_format: str = "Y-m-d"
-    financial_year_start: Optional[int] = None
+    financial_year_start: int | None = None
 
 
 class CompanyCreate(CompanyBase):
@@ -23,17 +22,17 @@ class CompanyCreate(CompanyBase):
 
 
 class CompanyUpdate(BaseModel):
-    name: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    address: Optional[str] = None
-    city: Optional[str] = None
-    country: Optional[str] = None
-    tax_id: Optional[str] = None
-    currency_code: Optional[str] = None
-    date_format: Optional[str] = None
-    financial_year_start: Optional[int] = None
-    is_active: Optional[bool] = None
+    name: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    address: str | None = None
+    city: str | None = None
+    country: str | None = None
+    tax_id: str | None = None
+    currency_code: str | None = None
+    date_format: str | None = None
+    financial_year_start: int | None = None
+    is_active: bool | None = None
 
 
 class CompanyResponse(CompanyBase):

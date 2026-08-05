@@ -1,12 +1,10 @@
-from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db, get_current_user
+from app.api.dependencies import get_current_user, get_db
 from app.models.auth.user import User
-from app.models.category import Category, CategoryType
+from app.models.category import Category
 from app.schemas.category import CategoryCreate, CategoryResponse, CategoryUpdate
 
 router = APIRouter(prefix="/categories", tags=["categories"])
@@ -15,7 +13,7 @@ router = APIRouter(prefix="/categories", tags=["categories"])
 @router.get("/", response_model=list[CategoryResponse])
 def list_categories(
     company_id: int,
-    type: Optional[str] = None,
+    type: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

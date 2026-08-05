@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -8,7 +7,7 @@ class ProfitLossRequest(BaseModel):
     company_id: int
     start_date: datetime
     end_date: datetime
-    currency_code: Optional[str] = "USD"
+    currency_code: str | None = "USD"
 
 
 class ProfitLossResponse(BaseModel):
@@ -24,7 +23,7 @@ class IncomeExpenseRequest(BaseModel):
     company_id: int
     start_date: datetime
     end_date: datetime
-    currency_code: Optional[str] = "USD"
+    currency_code: str | None = "USD"
 
 
 class IncomeExpenseResponse(BaseModel):
@@ -38,7 +37,7 @@ class TaxSummaryRequest(BaseModel):
     company_id: int
     start_date: datetime
     end_date: datetime
-    currency_code: Optional[str] = "USD"
+    currency_code: str | None = "USD"
 
 
 class TaxSummaryResponse(BaseModel):

@@ -7,4 +7,4 @@ def test_settings():
     assert settings.DATABASE_URL.startswith("postgresql://")
     assert settings.SECRET_KEY is not None
     assert settings.ALGORITHM == "HS256"
-    assert "localhost:3000" in settings.CORS_ORIGINS
+    assert "http://localhost:3000" in settings.CORS_ORIGINS

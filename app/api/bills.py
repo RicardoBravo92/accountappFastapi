@@ -1,10 +1,8 @@
-from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db, get_current_user
+from app.api.dependencies import get_current_user, get_db
 from app.models.auth.user import User
 from app.models.bill import Bill, BillStatus
 from app.schemas.bill import BillCreate, BillResponse, BillUpdate
@@ -15,8 +13,8 @@ router = APIRouter(prefix="/bills", tags=["bills"])
 @router.get("/", response_model=list[BillResponse])
 def list_bills(
     company_id: int,
-    status: Optional[str] = None,
-    vendor_id: Optional[int] = None,
+    status: str | None = None,
+    vendor_id: int | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+
 from sqlalchemy import DateTime, ForeignKey, Index, Integer, Numeric, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -11,7 +12,7 @@ class BillItem(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     bill_id: Mapped[int] = mapped_column(Integer, ForeignKey("bills.id", ondelete="CASCADE"), nullable=False)
-    item_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("items.id", ondelete="SET NULL"), nullable=True)
+    item_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("items.id", ondelete="SET NULL"), nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     quantity: Mapped[float] = mapped_column(Numeric(15, 4), nullable=False, default=1)
     price: Mapped[float] = mapped_column(Numeric(15, 2), nullable=False, default=0)

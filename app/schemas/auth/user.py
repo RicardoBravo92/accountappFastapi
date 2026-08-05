@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class UserBase(BaseModel):
@@ -9,7 +8,7 @@ class UserBase(BaseModel):
     username: str
     first_name: str
     last_name: str
-    role: Optional[str] = "viewer"
+    role: str | None = "viewer"
 
 
 class UserCreate(UserBase):
@@ -17,12 +16,12 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    email: Optional[str] = None
-    username: Optional[str] = None
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    role: Optional[str] = None
-    is_active: Optional[bool] = None
+    email: str | None = None
+    username: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    role: str | None = None
+    is_active: bool | None = None
 
 
 class UserLogin(BaseModel):

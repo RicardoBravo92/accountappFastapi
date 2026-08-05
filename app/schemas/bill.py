@@ -1,11 +1,10 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
 
 class BillItemBase(BaseModel):
-    item_id: Optional[int] = None
+    item_id: int | None = None
     description: str
     quantity: float = 1
     price: float = 0
@@ -35,7 +34,7 @@ class BillBase(BaseModel):
     issue_date: datetime
     due_date: datetime
     currency_code: str = "USD"
-    notes: Optional[str] = None
+    notes: str | None = None
 
 
 class BillCreate(BillBase):
@@ -43,13 +42,13 @@ class BillCreate(BillBase):
 
 
 class BillUpdate(BaseModel):
-    vendor_id: Optional[int] = None
-    bill_number: Optional[str] = None
-    issue_date: Optional[datetime] = None
-    due_date: Optional[datetime] = None
-    currency_code: Optional[str] = None
-    notes: Optional[str] = None
-    status: Optional[str] = None
+    vendor_id: int | None = None
+    bill_number: str | None = None
+    issue_date: datetime | None = None
+    due_date: datetime | None = None
+    currency_code: str | None = None
+    notes: str | None = None
+    status: str | None = None
 
 
 class BillResponse(BillBase):

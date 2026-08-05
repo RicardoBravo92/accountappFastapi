@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -7,14 +6,14 @@ from pydantic import BaseModel
 class ContactBase(BaseModel):
     type: str
     name: str
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    address: Optional[str] = None
-    city: Optional[str] = None
-    country: Optional[str] = None
-    tax_id: Optional[str] = None
-    website: Optional[str] = None
-    notes: Optional[str] = None
+    email: str | None = None
+    phone: str | None = None
+    address: str | None = None
+    city: str | None = None
+    country: str | None = None
+    tax_id: str | None = None
+    website: str | None = None
+    notes: str | None = None
 
 
 class ContactCreate(ContactBase):
@@ -22,17 +21,17 @@ class ContactCreate(ContactBase):
 
 
 class ContactUpdate(BaseModel):
-    type: Optional[str] = None
-    name: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    address: Optional[str] = None
-    city: Optional[str] = None
-    country: Optional[str] = None
-    tax_id: Optional[str] = None
-    website: Optional[str] = None
-    notes: Optional[str] = None
-    is_active: Optional[bool] = None
+    type: str | None = None
+    name: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    address: str | None = None
+    city: str | None = None
+    country: str | None = None
+    tax_id: str | None = None
+    website: str | None = None
+    notes: str | None = None
+    is_active: bool | None = None
 
 
 class ContactResponse(ContactBase):

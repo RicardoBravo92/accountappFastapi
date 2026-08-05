@@ -1,8 +1,15 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text, Index
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+)
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
 
@@ -26,9 +33,9 @@ class Recurring(Base):
     frequency: Mapped[str] = mapped_column(String(20), nullable=False, default=RecurringFrequency.MONTHLY)
     interval: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     start_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    end_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    last_generated: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    next_run: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    end_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_generated: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    next_run: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

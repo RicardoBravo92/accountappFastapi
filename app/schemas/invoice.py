@@ -1,11 +1,10 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
 
 class InvoiceItemBase(BaseModel):
-    item_id: Optional[int] = None
+    item_id: int | None = None
     description: str
     quantity: float = 1
     price: float = 0
@@ -35,7 +34,7 @@ class InvoiceBase(BaseModel):
     issue_date: datetime
     due_date: datetime
     currency_code: str = "USD"
-    notes: Optional[str] = None
+    notes: str | None = None
 
 
 class InvoiceCreate(InvoiceBase):
@@ -43,13 +42,13 @@ class InvoiceCreate(InvoiceBase):
 
 
 class InvoiceUpdate(BaseModel):
-    customer_id: Optional[int] = None
-    invoice_number: Optional[str] = None
-    issue_date: Optional[datetime] = None
-    due_date: Optional[datetime] = None
-    currency_code: Optional[str] = None
-    notes: Optional[str] = None
-    status: Optional[str] = None
+    customer_id: int | None = None
+    invoice_number: str | None = None
+    issue_date: datetime | None = None
+    due_date: datetime | None = None
+    currency_code: str | None = None
+    notes: str | None = None
+    status: str | None = None
 
 
 class InvoiceResponse(InvoiceBase):

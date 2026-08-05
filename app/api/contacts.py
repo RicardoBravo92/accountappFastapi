@@ -1,12 +1,10 @@
-from datetime import datetime
-from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db, get_current_user
+from app.api.dependencies import get_current_user, get_db
 from app.models.auth.user import User
-from app.models.contact import Contact, ContactType
+from app.models.contact import Contact
 from app.schemas.contact import ContactCreate, ContactResponse, ContactUpdate
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
@@ -15,7 +13,7 @@ router = APIRouter(prefix="/contacts", tags=["contacts"])
 @router.get("/", response_model=list[ContactResponse])
 def list_contacts(
     company_id: int = Query(...),
-    type: Optional[str] = Query(None),
+    type: str | None = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

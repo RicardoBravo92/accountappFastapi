@@ -1,6 +1,16 @@
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text, Index
+
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -15,7 +25,7 @@ class Item(Base):
     description: Mapped[str] = mapped_column(Text, nullable=True)
     unit_price: Mapped[float] = mapped_column(Numeric(15, 2), nullable=False, default=0)
     unit: Mapped[str] = mapped_column(String(20), nullable=True)
-    category_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True)
+    category_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True)
     tax_rate: Mapped[float] = mapped_column(Numeric(5, 2), nullable=False, default=0)
     sku: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

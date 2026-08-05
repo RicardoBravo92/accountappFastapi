@@ -1,10 +1,8 @@
-from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db, get_current_user
+from app.api.dependencies import get_current_user, get_db
 from app.models.auth.user import User
 from app.models.transfer import Transfer
 from app.schemas.transfer import TransferCreate, TransferResponse, TransferUpdate

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -7,9 +6,9 @@ from pydantic import BaseModel
 class CategoryBase(BaseModel):
     name: str
     type: str
-    color: Optional[str] = None
-    icon: Optional[str] = None
-    parent_id: Optional[int] = None
+    color: str | None = None
+    icon: str | None = None
+    parent_id: int | None = None
 
 
 class CategoryCreate(CategoryBase):
@@ -17,12 +16,12 @@ class CategoryCreate(CategoryBase):
 
 
 class CategoryUpdate(BaseModel):
-    name: Optional[str] = None
-    type: Optional[str] = None
-    color: Optional[str] = None
-    icon: Optional[str] = None
-    parent_id: Optional[int] = None
-    is_active: Optional[bool] = None
+    name: str | None = None
+    type: str | None = None
+    color: str | None = None
+    icon: str | None = None
+    parent_id: int | None = None
+    is_active: bool | None = None
 
 
 class CategoryResponse(CategoryBase):

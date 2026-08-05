@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -16,11 +15,11 @@ class TaxCreate(TaxBase):
 
 
 class TaxUpdate(BaseModel):
-    name: Optional[str] = None
-    rate: Optional[float] = None
-    type: Optional[str] = None
-    is_compound: Optional[bool] = None
-    is_active: Optional[bool] = None
+    name: str | None = None
+    rate: float | None = None
+    type: str | None = None
+    is_compound: bool | None = None
+    is_active: bool | None = None
 
 
 class TaxResponse(TaxBase):

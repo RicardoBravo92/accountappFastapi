@@ -1,9 +1,9 @@
-from pathlib import Path
-from typing import Optional, List
 import os
-from fastapi import UploadFile, HTTPException
-from PIL import Image
 import uuid
+from pathlib import Path
+
+from fastapi import UploadFile
+from PIL import Image
 
 from app.config import settings
 
@@ -22,10 +22,10 @@ def save_upload_file(upload_file: UploadFile) -> str:
     ensure_uploads_dir()
     filename = generate_filename(upload_file.filename)
     file_path = Path(settings.UPLOAD_DIR) / filename
-    
+
     with open(file_path, "wb") as f:
         f.write(upload_file.file.read())
-    
+
     return filename
 
 
@@ -61,6 +61,6 @@ def delete_file(filename: str) -> bool:
         return False
 
 
-def list_upload_files() -> List[str]:
+def list_upload_files() -> list[str]:
     ensure_uploads_dir()
     return [f.name for f in Path(settings.UPLOAD_DIR).iterdir() if f.is_file()]

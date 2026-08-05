@@ -1,9 +1,8 @@
-import pytest
 from datetime import datetime
+
+from app.models.account import Account, AccountType
 from app.models.auth.user import User, UserRole
 from app.models.company import Company
-from app.models.contact import Contact
-from app.models.account import Account, AccountType
 from app.models.transaction import Transaction, TransactionType
 
 
@@ -14,9 +13,11 @@ def test_user_creation():
         password_hash="hashed_password",
         first_name="Test",
         last_name="User",
-        role=UserRole.VIEWER
+        role=UserRole.VIEWER,
+        is_active=True,
+        created_at=datetime.utcnow(),
     )
-    
+
     assert user.id is None
     assert user.email == "test@example.com"
     assert user.username == "testuser"
@@ -30,9 +31,11 @@ def test_company_creation():
         name="Test Company",
         slug="test-company",
         email="contact@test.com",
-        phone="1234567890"
+        phone="1234567890",
+        currency_code="USD",
+        is_active=True,
     )
-    
+
     assert company.id is None
     assert company.name == "Test Company"
     assert company.slug == "test-company"
@@ -46,9 +49,10 @@ def test_account_creation():
         code="1000",
         name="Cash",
         type=AccountType.ASSET,
-        is_bank=True
+        is_bank=True,
+        is_active=True,
     )
-    
+
     assert account.id is None
     assert account.code == "1000"
     assert account.name == "Cash"
@@ -63,9 +67,10 @@ def test_transaction_creation():
         amount=100.50,
         currency_code="USD",
         description="Test transaction",
-        reference="REF123"
+        reference="REF123",
+        is_reconciled=False,
     )
-    
+
     assert transaction.id is None
     assert transaction.type == TransactionType.DEPOSIT
     assert transaction.amount == 100.50

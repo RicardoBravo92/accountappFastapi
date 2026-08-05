@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db, get_current_user
+from app.api.dependencies import get_current_user, get_db
 from app.core.auth import (
     create_access_token,
     create_refresh_token,
@@ -47,7 +47,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
     access_token = create_access_token({"user_id": user.id})
     refresh_token = create_refresh_token({"user_id": user.id})
-    expires_at = datetime.now(timezone.utc) + timedelta(minutes=30)
+    expires_at = datetime.now(UTC) + timedelta(minutes=30)
 
     return Token(
         access_token=access_token,
@@ -72,7 +72,7 @@ def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
 
     access_token = create_access_token({"user_id": user.id})
     new_refresh_token = create_refresh_token({"user_id": user.id})
-    expires_at = datetime.now(timezone.utc) + timedelta(minutes=30)
+    expires_at = datetime.now(UTC) + timedelta(minutes=30)
 
     return Token(
         access_token=access_token,
