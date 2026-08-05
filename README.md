@@ -11,8 +11,8 @@
 
 ```bash
 # Clone and setup
-git clone https://github.com/org/accountapp.git
-cd accountapp/accountappBack
+git clone git@github.com:RicardoBravo92/accountappFastapi.git
+cd accountappFastapi
 cp .env.example .env
 uv sync
 
@@ -67,16 +67,16 @@ curl http://localhost:8000/api/v1/companies \
 
 Create a `.env` file based on `.env.example`:
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `DATABASE_URL` | Database connection string (PostgreSQL or SQLite) | `sqlite:///./accountapp.db` | No |
-| `SECRET_KEY` | Key for signing JWT tokens | `change-me-in-production` | **Yes** |
-| `ALGORITHM` | JWT signing algorithm | `HS256` | No |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Access token expiration (minutes) | `30` | No |
-| `REFRESH_TOKEN_EXPIRE_DAYS` | Refresh token expiration (days) | `7` | No |
-| `CORS_ORIGINS` | Allowed CORS origins | `["http://localhost:3000","http://localhost:5173"]` | No |
-| `UPLOAD_DIR` | Directory for file uploads | `uploads` | No |
-| `MAX_UPLOAD_SIZE` | Max upload size in bytes | `10 * 1024 * 1024` (10MB) | No |
+| Variable                      | Description                                       | Default                                             | Required |
+| ----------------------------- | ------------------------------------------------- | --------------------------------------------------- | -------- |
+| `DATABASE_URL`                | Database connection string (PostgreSQL or SQLite) | `sqlite:///./accountapp.db`                         | No       |
+| `SECRET_KEY`                  | Key for signing JWT tokens                        | `change-me-in-production`                           | **Yes**  |
+| `ALGORITHM`                   | JWT signing algorithm                             | `HS256`                                             | No       |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Access token expiration (minutes)                 | `30`                                                | No       |
+| `REFRESH_TOKEN_EXPIRE_DAYS`   | Refresh token expiration (days)                   | `7`                                                 | No       |
+| `CORS_ORIGINS`                | Allowed CORS origins                              | `["http://localhost:3000","http://localhost:5173"]` | No       |
+| `UPLOAD_DIR`                  | Directory for file uploads                        | `uploads`                                           | No       |
+| `MAX_UPLOAD_SIZE`             | Max upload size in bytes                          | `10 * 1024 * 1024` (10MB)                           | No       |
 
 ### Example `.env`
 
@@ -99,38 +99,38 @@ DEBUG=false
 
 ### Authentication (`/api/v1/auth`)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/register` | Register a new user |
-| POST | `/auth/login` | Login and receive tokens |
-| POST | `/auth/refresh` | Refresh access token |
-| GET | `/auth/me` | Get current user info |
+| Method | Endpoint         | Description              |
+| ------ | ---------------- | ------------------------ |
+| POST   | `/auth/register` | Register a new user      |
+| POST   | `/auth/login`    | Login and receive tokens |
+| POST   | `/auth/refresh`  | Refresh access token     |
+| GET    | `/auth/me`       | Get current user info    |
 
 ### Business Entities (`/api/v1`)
 
-| Entity | Methods Supported |
-|--------|------------------|
-| **Companies** | Create, Read, Update, Delete (soft), List |
-| **Contacts** | CRUD + type filtering (customer/vendor/both) |
-| **Accounts** | CRUD + type filtering (asset/liability/equity/income/expense) |
-| **Transactions** | CRUD + reconciliation status |
-| **Invoices** | CRUD + items with tax calculation |
-| **Bills** | CRUD + items with tax calculation |
-| **Items** | CRUD for inventory/product items |
-| **Categories** | CRUD for transaction categorization |
-| **Currencies** | CRUD with conversion rates |
-| **Transfers** | Between accounts |
-| **Reports** | Profit-loss, Income-expense, Tax summary |
-| **Uploads** | File upload/download with size limits |
+| Entity           | Methods Supported                                             |
+| ---------------- | ------------------------------------------------------------- |
+| **Companies**    | Create, Read, Update, Delete (soft), List                     |
+| **Contacts**     | CRUD + type filtering (customer/vendor/both)                  |
+| **Accounts**     | CRUD + type filtering (asset/liability/equity/income/expense) |
+| **Transactions** | CRUD + reconciliation status                                  |
+| **Invoices**     | CRUD + items with tax calculation                             |
+| **Bills**        | CRUD + items with tax calculation                             |
+| **Items**        | CRUD for inventory/product items                              |
+| **Categories**   | CRUD for transaction categorization                           |
+| **Currencies**   | CRUD with conversion rates                                    |
+| **Transfers**    | Between accounts                                              |
+| **Reports**      | Profit-loss, Income-expense, Tax summary                      |
+| **Uploads**      | File upload/download with size limits                         |
 
 ### System Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/health` | Health check |
-| GET | `/` | API information |
-| GET | `/docs` | Swagger UI (interactive docs) |
-| GET | `/redoc` | ReDoc documentation |
+| Method | Endpoint  | Description                   |
+| ------ | --------- | ----------------------------- |
+| GET    | `/health` | Health check                  |
+| GET    | `/`       | API information               |
+| GET    | `/docs`   | Swagger UI (interactive docs) |
+| GET    | `/redoc`  | ReDoc documentation           |
 
 ## Testing
 
@@ -157,7 +157,7 @@ uv run pytest --cov=app tests/
 - **Role-Based Access Control**: `admin`, `viewer`, and `manager` roles
 - **CORS**: Configurable per environment
 - **Rate Limiting**: Ready for implementation
-- **Security Headers**: 
+- **Security Headers**:
   - `X-Content-Type-Options: nosniff`
   - `X-Frame-Options: DENY`
   - `X-XSS-Protection: 1; mode=block`
