@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env
+.env.example
+__pycache__/
+*.py[cod]
+*.env
+uploads/
+*.db
+*.sqlite
+accountapp.db
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/

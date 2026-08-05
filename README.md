@@ -245,6 +245,48 @@ uv run alembic upgrade head
 uv run alembic downgrade -1
 ```
 
+## Docker
+
+```bash
+# Build and run with docker-compose (includes PostgreSQL and Redis)
+docker-compose up --build -d
+
+# Run in development mode with hot reload
+docker-compose -f docker-compose.yml up --build
+
+# Stop all services
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Run tests in container
+docker-compose exec app uv run pytest
+```
+
+### Production Deployment
+
+For production deployments, use the pre-built image:
+
+```bash
+# Pull and run
+docker build -t accountapp/backend .
+docker run -d \
+  --name accountapp-backend \
+  -p 8000:8000 \
+  --env-file .env \
+  accountapp/backend
+```
+
+Ensure your `.env` file has production settings:
+```bash
+ENVIRONMENT=production
+DEBUG=false
+DATABASE_URL=postgresql://user:pass@db:5432/accountapp
+SECRET_KEY=your-secure-32-char-min-secret
+CORS_ORIGINS=https://yourdomain.com
+```
+
 ## License
 
 MIT
