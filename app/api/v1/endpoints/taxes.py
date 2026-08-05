@@ -10,41 +10,41 @@ from app.services.taxes import tax_service
 router = APIRouter(prefix="/taxes", tags=["taxes"])
 
 @router.get("/", response_model=list[TaxResponse])
-def list_taxes(
+async def list_taxes(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return tax_service.list_taxes(db, current_user)
+    return await tax_service["list_taxes"](db, current_user)
 
 @router.post("/", response_model=TaxResponse, status_code=status.HTTP_201_CREATED)
-def create_tax(
+async def create_tax(
     tax_data: TaxCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return tax_service.create_tax(db, tax_data, current_user)
+    return await tax_service["create_tax"](db, tax_data, current_user)
 
 @router.get("/{tax_id}", response_model=TaxResponse)
-def get_tax(
+async def get_tax(
     tax_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return tax_service.get_tax(db, tax_id, current_user)
+    return await tax_service["get_tax"](db, tax_id, current_user)
 
 @router.put("/{tax_id}", response_model=TaxResponse)
-def update_tax(
+async def update_tax(
     tax_id: int,
     tax_data: TaxUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return tax_service.update_tax(db, tax_id, tax_data, current_user)
+    return await tax_service["update_tax"](db, tax_id, tax_data, current_user)
 
 @router.delete("/{tax_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_tax(
+async def delete_tax(
     tax_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return tax_service.delete_tax(db, tax_id, current_user)
+    return await tax_service["delete_tax"](db, tax_id, current_user)

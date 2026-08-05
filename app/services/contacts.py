@@ -26,7 +26,7 @@ async def get_contact(db, contact_id, current_user):
 
 
 async def update_contact(db, contact_id, contact_data, current_user):
-    contact = get_contact(db, contact_id, current_user)
+    contact = await get_contact(db, contact_id, current_user)
     update_data = contact_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(contact, key, value)
@@ -36,8 +36,8 @@ async def update_contact(db, contact_id, contact_data, current_user):
 
 
 async def delete_contact(db, contact_id, current_user):
-    contact = get_contact(db, contact_id, current_user)
-    db.delete(contact)
+    contact = await get_contact(db, contact_id, current_user)
+    contact.is_active = False
     db.commit()
     return contact
 
