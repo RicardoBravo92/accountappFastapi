@@ -1,6 +1,5 @@
 # AccountApp Backend
 
-[![Build](https://img.shields.io/github/actions/workflow/status/org/accountapp/ci.yml)](https://github.com/org/accountapp)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-blue)](https://fastapi.tiangolo.com/)
@@ -279,6 +278,7 @@ docker run -d \
 ```
 
 Ensure your `.env` file has production settings:
+
 ```bash
 ENVIRONMENT=production
 DEBUG=false
