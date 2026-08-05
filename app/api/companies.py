@@ -7,6 +7,8 @@ from app.models.auth.user import User
 from app.models.company import Company
 from app.schemas.company import CompanyCreate, CompanyResponse, CompanyUpdate
 
+from app.services.companies import list_companies, create_company, get_company, update_company, delete_company
+
 router = APIRouter(prefix="/companies", tags=["companies"])
 
 
@@ -15,7 +17,7 @@ def list_companies(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return db.query(Company).filter(Company.is_active == True).all()
+    return list_companies(db, current_user)   
 
 
 @router.post("/", response_model=CompanyResponse, status_code=status.HTTP_201_CREATED)
@@ -24,11 +26,7 @@ def create_company(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    company = Company(**company_data.model_dump())
-    db.add(company)
-    db.commit()
-    db.refresh(company)
-    return company
+    return create_company(db, company_data, current_user)   
 
 
 @router.get("/{company_id}", response_model=CompanyResponse)
@@ -37,10 +35,7 @@ def get_company(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    company = db.query(Company).filter(Company.id == company_id).first()
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
-    return company
+    return get_company(db, company_id, current_user)
 
 
 @router.put("/{company_id}", response_model=CompanyResponse)
@@ -50,17 +45,7 @@ def update_company(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    company = db.query(Company).filter(Company.id == company_id).first()
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
-
-    update_data = company_data.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(company, key, value)
-
-    db.commit()
-    db.refresh(company)
-    return company
+    return update_company(db, company_id, company_data, current_user)   
 
 
 @router.delete("/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -69,8 +54,4 @@ def delete_company(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    company = db.query(Company).filter(Company.id == company_id).first()
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
-    company.is_active = False
-    db.commit()
+    return delete_company(db, company_id, current_user)   

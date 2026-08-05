@@ -16,12 +16,7 @@ def list_transfers(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return (
-        db.query(Transfer)
-        .filter(Transfer.company_id == company_id)
-        .order_by(Transfer.transferred_at.desc())
-        .all()
-    )
+    return list_transfers(db, company_id, current_user)
 
 
 @router.post("/", response_model=TransferResponse, status_code=status.HTTP_201_CREATED)
@@ -30,11 +25,7 @@ def create_transfer(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    transfer = Transfer(**transfer_data.model_dump())
-    db.add(transfer)
-    db.commit()
-    db.refresh(transfer)
-    return transfer
+    return create_transfer(db, transfer_data, current_user)
 
 
 @router.get("/{transfer_id}", response_model=TransferResponse)
@@ -43,10 +34,7 @@ def get_transfer(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    transfer = db.query(Transfer).filter(Transfer.id == transfer_id).first()
-    if not transfer:
-        raise HTTPException(status_code=404, detail="Transfer not found")
-    return transfer
+    return get_transfer(db, transfer_id, current_user)
 
 
 @router.put("/{transfer_id}", response_model=TransferResponse)
@@ -56,17 +44,7 @@ def update_transfer(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    transfer = db.query(Transfer).filter(Transfer.id == transfer_id).first()
-    if not transfer:
-        raise HTTPException(status_code=404, detail="Transfer not found")
-
-    update_data = transfer_data.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(transfer, key, value)
-
-    db.commit()
-    db.refresh(transfer)
-    return transfer
+    return update_transfer(db, transfer_id, transfer_data, current_user)
 
 
 @router.delete("/{transfer_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -75,8 +53,4 @@ def delete_transfer(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    transfer = db.query(Transfer).filter(Transfer.id == transfer_id).first()
-    if not transfer:
-        raise HTTPException(status_code=404, detail="Transfer not found")
-    db.delete(transfer)
-    db.commit()
+    return delete_transfer(db, transfer_id, current_user)

@@ -17,10 +17,7 @@ def list_items(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    query = db.query(Item).filter(Item.company_id == company_id)
-    if category_id:
-        query = query.filter(Item.category_id == category_id)
-    return query.all()
+    return list_items(db, company_id, category_id, current_user)
 
 
 @router.post("/", response_model=ItemResponse, status_code=status.HTTP_201_CREATED)
@@ -29,11 +26,7 @@ def create_item(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    item = Item(**item_data.model_dump())
-    db.add(item)
-    db.commit()
-    db.refresh(item)
-    return item
+    return create_item(db, item_data, current_user)
 
 
 @router.get("/{item_id}", response_model=ItemResponse)
@@ -42,10 +35,7 @@ def get_item(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    item = db.query(Item).filter(Item.id == item_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return item
+    return get_item(db, item_id, current_user)
 
 
 @router.put("/{item_id}", response_model=ItemResponse)
@@ -55,17 +45,7 @@ def update_item(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    item = db.query(Item).filter(Item.id == item_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-    update_data = item_data.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(item, key, value)
-
-    db.commit()
-    db.refresh(item)
-    return item
+    return update_item(db, item_id, item_data, current_user)
 
 
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -74,8 +54,4 @@ def delete_item(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    item = db.query(Item).filter(Item.id == item_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    item.is_active = False
-    db.commit()
+    return delete_item(db, item_id, current_user)

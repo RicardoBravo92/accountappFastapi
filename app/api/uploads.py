@@ -30,16 +30,7 @@ def upload_file(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    if not validate_file_size(file):
-        raise HTTPException(status_code=400, detail="File size exceeds limit")
-
-    if file.content_type.startswith("image/"):
-        if not validate_image_upload(file):
-            raise HTTPException(status_code=400, detail="Invalid image format")
-
-    filename = save_upload_file(file)
-
-    return {"filename": filename, "message": "File uploaded successfully"}
+    return upload_file(file)
 
 
 @router.get("/")
@@ -47,8 +38,7 @@ def list_uploads(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    files = list_upload_files()
-    return {"files": files}
+    return list_upload_files()
 
 
 @router.get("/{filename}")
@@ -57,11 +47,8 @@ def download_file(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    file_path = get_file_path(filename)
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="File not found")
-
-    return FileResponse(file_path, filename=filename)
+    return download_file(filename)
+    
 
 
 @router.delete("/{filename}", status_code=status.HTTP_204_NO_CONTENT)
@@ -70,6 +57,4 @@ def delete_upload(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    success = delete_file(filename)
-    if not success:
-        raise HTTPException(status_code=404, detail="File not found or could not be deleted")
+    return delete_file(filename)    
