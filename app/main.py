@@ -8,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import settings, get_logger
 from app.database import Base, engine
+from app.services.rate_limit import rate_limit
 
 logger = get_logger(__name__)
 
@@ -63,6 +64,14 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
+
+    @app.middleware("http")
+    async def rate_limit_middleware(request: Request, call_next):
+        """Apply global rate limiting to all API requests."""
+        if request.url.path.startswith("/api/"):
+            rate_limit(request)
+        response = await call_next(request)
+        return response
 
     @app.middleware("http")
     async def add_security_headers(request: Request, call_next):

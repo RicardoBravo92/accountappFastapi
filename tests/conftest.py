@@ -8,6 +8,17 @@ from sqlalchemy.orm import sessionmaker
 from app.core.database import Base
 from app.api.dependencies import get_db
 from app.main import app
+from app.services.rate_limit import api_rate_limiter, login_rate_limiter
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limiters():
+    """Reset rate limiters before each test."""
+    api_rate_limiter.reset()
+    login_rate_limiter.reset()
+    yield
+    api_rate_limiter.reset()
+    login_rate_limiter.reset()
 
 
 @pytest.fixture(scope="session")

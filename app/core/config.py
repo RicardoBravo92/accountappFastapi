@@ -1,7 +1,5 @@
 import logging
-import os
 from functools import lru_cache
-from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -42,7 +40,12 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         """Check if running in production environment."""
-        return self.ENVIRONMENT == "production"
+        return self.ENVIRONMENT.lower() == "production"
+
+    @property
+    def is_development(self) -> bool:
+        """Check if running in development environment."""
+        return self.ENVIRONMENT.lower() == "development"
 
     def get_database_connection_kwargs(self) -> dict:
         """Get database connection parameters with proper encoding."""
@@ -64,6 +67,38 @@ class Settings(BaseSettings):
 
         return kwargs
 
+    def validate_production_settings(self) -> list[str]:
+        """Validate settings for production environment.
+        
+        Returns a list of validation warning messages.
+        """
+        warnings = []
+
+        if self.is_production:
+            # Check SECRET_KEY
+            if self.SECRET_KEY == "change-me-in-production" or len(self.SECRET_KEY) < 32:
+                warnings.append(
+                    "SECRET_KEY must be set to a secure random string of at least 32 characters in production"
+                )
+
+            # Check CORS origins don't include wildcards
+            if "*" in self.CORS_ORIGINS:
+                warnings.append(
+                    "CORS_ORIGINS must not include wildcard '*' in production"
+                )
+
+            # Warn about SQLite in production
+            if self.DATABASE_URL.startswith("sqlite"):
+                warnings.append(
+                    "SQLite is not recommended for production. Use PostgreSQL instead."
+                )
+
+            # Check DEBUG
+            if self.DEBUG:
+                warnings.append("DEBUG should be false in production")
+
+        return warnings
+
 
 @lru_cache
 def get_settings() -> Settings:
@@ -72,6 +107,11 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+
+# Validate and log warnings on startup
+_warnings = settings.validate_production_settings()
+for _warning in _warnings:
+    logging.warning(f"Configuration Warning: {_warning}")
 
 
 # Configure logging based on environment
