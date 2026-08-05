@@ -71,4 +71,13 @@ async def delete_bill(
         bill = get_bill(db, bill_id, current_user)
         db.delete(bill)
         db.commit()
+
+
+bills_service = {
+    "get_all_bills": get_all_bills,
+    "get_bill": get_bill,
+    "create_bill": create_bill,
+    "update_bill": update_bill,
+    "delete_bill": delete_bill,
+}
         

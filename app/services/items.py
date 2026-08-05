@@ -1,7 +1,7 @@
 
 from fastapi import HTTPException
 
-from app.models import Item
+from app.models.item import Item
 
 async def get_item(db, item_id, current_user) -> Item:
     item = db.query(Item).filter(Item.id == item_id).first()
@@ -9,8 +9,8 @@ async def get_item(db, item_id, current_user) -> Item:
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
-async def list_items(db, company_id, current_user,category_id=None):
-    query = db.query(Item).filter(Item.company_id == company_id,Item.user_id == current_user.id)
+async def list_items(db, company_id, current_user, category_id=None):
+    query = db.query(Item).filter(Item.company_id == company_id, Item.user_id == current_user.id)
     if category_id:
         query = query.filter(Item.category_id == category_id)
     return query.all()
@@ -36,3 +36,12 @@ async def delete_item(db, item_id, current_user):
     item.is_active = False
     db.commit()
     return item
+
+
+item_service = {
+    "get_item": get_item,
+    "list_items": list_items,
+    "create_item": create_item,
+    "update_item": update_item,
+    "delete_item": delete_item,
+}

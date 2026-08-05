@@ -58,3 +58,12 @@ async def delete_category(
     category = get_category(db, category_id, current_user)
     category.is_active = False
     db.commit()
+
+
+category_service = {
+    "get_all_categories": get_all_categories,
+    "get_category": get_category,
+    "create_category": create_category,
+    "update_category": update_category,
+    "delete_category": delete_category,
+}

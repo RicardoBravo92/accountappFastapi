@@ -39,4 +39,13 @@ async def delete_transaction(db, transaction_id, current_user):
         raise HTTPException(status_code=404, detail="Transaction not found")
     db.delete(transaction)
     db.commit()
+
+
+transaction_service = {
+    "list_transactions": list_transactions,
+    "create_transaction": create_transaction,
+    "get_transaction": get_transaction,
+    "update_transaction": update_transaction,
+    "delete_transaction": delete_transaction,
+}
     

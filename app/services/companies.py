@@ -35,8 +35,17 @@ async def create_company( db, company_data, current_user):
     db.refresh(company)
     return company
 
-async def list_companies( db, current_user):
+async def list_companies(db, current_user):
     return db.query(Company).filter(Company.is_active == True).all()
+
+
+company_service = {
+    "get_company": get_company,
+    "update_company": update_company,
+    "delete_company": delete_company,
+    "create_company": create_company,
+    "list_companies": list_companies,
+}
 
     
 

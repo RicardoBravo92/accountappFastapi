@@ -57,3 +57,14 @@ def delete_user(db: Session, user_id: int) -> bool:
     db.delete(user)
     db.commit()
     return True
+
+
+user_service = {
+    "authenticate_user": authenticate_user,
+    "get_user_by_id": get_user_by_id,
+    "get_user_by_email": get_user_by_email,
+    "create_user": create_user,
+    "list_users": list_users,
+    "update_user": update_user,
+    "delete_user": delete_user,
+}

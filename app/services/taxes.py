@@ -34,3 +34,12 @@ async def delete_tax(db, tax_id, current_user):
         raise HTTPException(status_code=404, detail="Tax not found")
     tax.is_active = False
     db.commit()
+
+
+tax_service = {
+    "list_taxes": list_taxes,
+    "create_tax": create_tax,
+    "get_tax": get_tax,
+    "update_tax": update_tax,
+    "delete_tax": delete_tax,
+}

@@ -34,4 +34,13 @@ async def delete_transfer(db, transfer_id, current_user=None):
         raise HTTPException(status_code=404, detail="Transfer not found")
     db.delete(transfer)
     db.commit()
+
+
+transfer_service = {
+    "list_transfers": list_transfers,
+    "create_transfer": create_transfer,
+    "get_transfer": get_transfer,
+    "update_transfer": update_transfer,
+    "delete_transfer": delete_transfer,
+}
     

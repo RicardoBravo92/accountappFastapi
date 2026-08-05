@@ -41,3 +41,12 @@ async def delete_invoice(db, invoice_id, current_user):
     db.delete(invoice)
     db.commit()
     return invoice
+
+
+invoice_service = {
+    "list_invoices": list_invoices,
+    "create_invoice": create_invoice,
+    "get_invoice": get_invoice,
+    "update_invoice": update_invoice,
+    "delete_invoice": delete_invoice,
+}

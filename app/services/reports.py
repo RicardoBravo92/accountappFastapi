@@ -38,3 +38,10 @@ async def tax_summary_report(db, company_id, start_date, end_date, current_user)
         by_tax_rate=[],
         period={"start": start_date, "end": end_date},
     )
+
+
+report_service = {
+    "profit_loss_report": profit_loss_report,
+    "income_expense_report": income_expense_report,
+    "tax_summary_report": tax_summary_report,
+}

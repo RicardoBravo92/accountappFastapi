@@ -1,5 +1,4 @@
-
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_db
@@ -10,11 +9,9 @@ from app.schemas.transaction import (
     TransactionResponse,
     TransactionUpdate,
 )
+from app.services.transactions import transaction_service
 
-
-from app.services.transactions import list_transactions,get_transaction,update_transaction,delete_transaction,create_transaction
 router = APIRouter(prefix="/transactions", tags=["transactions"])
-
 
 @router.get("/", response_model=list[TransactionResponse])
 def list_transactions(
@@ -24,8 +21,9 @@ def list_transactions(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return list_transactions(db, company_id, account_id, type, current_user)
-
+    return transaction_service.list_transactions(
+        db, company_id, account_id, type, current_user
+    )
 
 @router.post("/", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
 def create_transaction(
@@ -33,9 +31,9 @@ def create_transaction(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return create_transaction(db, transaction_data, current_user)
-
-
+    return transaction_service.create_transaction(
+        db, transaction_data, current_user
+    )
 
 @router.get("/{transaction_id}", response_model=TransactionResponse)
 def get_transaction(
@@ -43,9 +41,9 @@ def get_transaction(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return get_transaction(db, transaction_id, current_user)
-
-
+    return transaction_service.get_transaction(
+        db, transaction_id, current_user
+    )
 
 @router.put("/{transaction_id}", response_model=TransactionResponse)
 def update_transaction(
@@ -54,9 +52,9 @@ def update_transaction(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return update_transaction(db, transaction_id, transaction_data, current_user)   
-
-
+    return transaction_service.update_transaction(
+        db, transaction_id, transaction_data, current_user
+    )
 
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_transaction(
@@ -64,4 +62,6 @@ def delete_transaction(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return delete_transaction(db, transaction_id, current_user)   
+    return transaction_service.delete_transaction(
+        db, transaction_id, current_user
+    )

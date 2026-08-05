@@ -59,12 +59,21 @@ async def delete_account(
 
 
 async def create_account(
-    db: Session,
-    account_data: AccountCreate,
-    current_user: User = None,
-) -> AccountResponse:
-    account = Account(**account_data.model_dump(), user_id=current_user.id)
-    db.add(account)
-    db.commit()
-    db.refresh(account)
-    return account
+        db: Session,
+        account_data: AccountCreate,
+        current_user: User = None,
+    ) -> AccountResponse:
+        account = Account(**account_data.model_dump(), user_id=current_user.id)
+        db.add(account)
+        db.commit()
+        db.refresh(account)
+        return account
+
+
+account_service = {
+    "get_all_accounts": get_all_accounts,
+    "get_account": get_account,
+    "update_account": update_account,
+    "delete_account": delete_account,
+    "create_account": create_account,
+}

@@ -1,6 +1,6 @@
+from fastapi import File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
-from PIL import GimpGradientFile
-from fastapi import UploadFile
+
 from app.utils.file_upload import (
     delete_file,
     get_file_path,
@@ -9,11 +9,9 @@ from app.utils.file_upload import (
     validate_file_size,
     validate_image_upload,
 )
-from fastapi import HTTPException
-from fastapi import File , UploadFile 
-from app.services.uploads import upload_file
 
-async def upload_file (file: UploadFile = File(...)):
+
+async def upload_file(file: UploadFile = File(...)):
     if not validate_file_size(file):
         raise HTTPException(status_code=400, detail="File size exceeds limit")
 
@@ -26,8 +24,9 @@ async def upload_file (file: UploadFile = File(...)):
     return {"filename": filename, "message": "File uploaded successfully"}
 
 
-async def list_uploads (): 
+async def list_uploads():
     return list_upload_files()
+
 
 async def download_file(filename: str):
     file_path = get_file_path(filename)
@@ -36,7 +35,16 @@ async def download_file(filename: str):
 
     return FileResponse(file_path, filename=filename)
 
+
 async def delete_upload(filename: str):
     success = delete_file(filename)
     if not success:
         raise HTTPException(status_code=404, detail="File not found or could not be deleted")
+
+
+upload_service = {
+    "upload_file": upload_file,
+    "list_uploads": list_uploads,
+    "download_file": download_file,
+    "delete_upload": delete_upload,
+}
