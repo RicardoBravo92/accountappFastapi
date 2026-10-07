@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import settings, get_logger
@@ -93,23 +94,25 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(SQLAlchemyError)
     async def sqlalchemy_exception_handler(request, exc):
+        logger.error(f"Database error: {exc}", exc_info=True)
         return JSONResponse(
             status_code=500,
             content={
                 "error": "Database error",
-                "message": str(exc),
-                "detail": "A database operation failed",
+                "message": "A database operation failed",
+                "detail": "Please try again later or contact support",
             },
         )
 
     @app.exception_handler(Exception)
     async def global_exception_handler(request, exc):
+        logger.error(f"Unhandled error: {exc}", exc_info=True)
         return JSONResponse(
             status_code=500,
             content={
                 "error": "Internal server error",
-                "message": str(exc),
-                "detail": "An unexpected error occurred",
+                "message": "An unexpected error occurred",
+                "detail": "Please try again later or contact support",
             },
         )
 
@@ -119,11 +122,21 @@ def create_app() -> FastAPI:
 
     @app.get("/health")
     async def health_check():
+        """Health check endpoint with actual database connectivity test."""
+        try:
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            db_status = "connected"
+            overall_status = "ok"
+        except Exception:
+            db_status = "disconnected"
+            overall_status = "degraded"
+
         return {
-            "status": "ok",
+            "status": overall_status,
             "version": settings.APP_VERSION,
             "environment": settings.ENVIRONMENT,
-            "database": "connected" if engine else "disconnected",
+            "database": db_status,
         }
 
     @app.get("/")

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 
 from sqlalchemy import (
@@ -42,8 +42,8 @@ class Invoice(Base):
     currency_code: Mapped[str] = mapped_column(String(3), nullable=False, default="USD")
     notes: Mapped[str] = mapped_column(Text, nullable=True)
     paid_amount: Mapped[float] = mapped_column(Numeric(15, 2), nullable=False, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
     customer: Mapped["Contact"] = relationship("Contact")
     items: Mapped[list["InvoiceItem"]] = relationship("InvoiceItem", back_populates="invoice", cascade="all, delete-orphan")

@@ -1,15 +1,21 @@
-
-
-from app.models import Company
+from typing import Optional, List
+from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
-async def get_company( db, company_id, current_user):
+from app.models import Company
+from app.schemas.company import CompanyCreate, CompanyUpdate
+
+
+def get_company(db: Session, company_id: int, current_user) -> Company:
+    """Get a company by ID."""
     company = db.query(Company).filter(Company.id == company_id).first()
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
     return company
 
-async def update_company( db, company_id, company_data, current_user):
+
+def update_company(db: Session, company_id: int, company_data: CompanyUpdate, current_user) -> Company:
+    """Update a company."""
     company = db.query(Company).filter(Company.id == company_id).first()
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
@@ -20,7 +26,9 @@ async def update_company( db, company_id, company_data, current_user):
     db.refresh(company)
     return company
 
-async def delete_company( db, company_id, current_user):
+
+def delete_company(db: Session, company_id: int, current_user) -> Company:
+    """Soft delete a company."""
     company = db.query(Company).filter(Company.id == company_id).first()
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
@@ -28,25 +36,16 @@ async def delete_company( db, company_id, current_user):
     db.commit()
     return company
 
-async def create_company( db, company_data, current_user):
+
+def create_company(db: Session, company_data: CompanyCreate, current_user) -> Company:
+    """Create a new company."""
     company = Company(**company_data.model_dump())
     db.add(company)
     db.commit()
     db.refresh(company)
     return company
 
-async def list_companies(db, current_user):
+
+def list_companies(db: Session, current_user) -> List[Company]:
+    """List all active companies."""
     return db.query(Company).filter(Company.is_active == True).all()
-
-
-company_service = {
-    "get_company": get_company,
-    "update_company": update_company,
-    "delete_company": delete_company,
-    "create_company": create_company,
-    "list_companies": list_companies,
-}
-
-    
-
-    

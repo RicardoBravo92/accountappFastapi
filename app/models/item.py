@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Optional
 
 from sqlalchemy import (
@@ -29,8 +29,8 @@ class Item(Base):
     tax_rate: Mapped[float] = mapped_column(Numeric(5, 2), nullable=False, default=0)
     sku: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
     company: Mapped["Company"] = relationship("Company")
     category: Mapped[Optional["Category"]] = relationship("Category")

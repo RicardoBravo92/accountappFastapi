@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Optional
 
 from sqlalchemy import DateTime, ForeignKey, Index, Integer, Numeric, Text
@@ -21,7 +21,7 @@ class InvoiceItem(Base):
     discount: Mapped[float] = mapped_column(Numeric(15, 2), nullable=False, default=0)
     total: Mapped[float] = mapped_column(Numeric(15, 2), nullable=False, default=0)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
 
     invoice: Mapped["Invoice"] = relationship("Invoice", back_populates="items")
     item: Mapped[Optional["Item"]] = relationship("Item")

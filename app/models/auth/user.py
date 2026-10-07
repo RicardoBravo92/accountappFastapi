@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String
@@ -25,8 +25,8 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False, default=UserRole.VIEWER)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
     companies: Mapped[list["UserCompany"]] = relationship(
         "UserCompany", back_populates="user", cascade="all, delete-orphan"
@@ -45,7 +45,7 @@ class UserCompany(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     company_id: Mapped[int] = mapped_column(Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
     is_owner: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
 
     user: Mapped["User"] = relationship("User", back_populates="companies")
     company: Mapped["Company"] = relationship("Company", back_populates="users")

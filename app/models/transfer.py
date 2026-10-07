@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlalchemy import (
     Boolean,
@@ -28,8 +28,8 @@ class Transfer(Base):
     reference: Mapped[str] = mapped_column(String(255), nullable=True, index=True)
     transferred_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     is_reconciled: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
     from_account: Mapped["Account"] = relationship("Account", foreign_keys=[from_account_id], back_populates="outgoing_transfers")
     to_account: Mapped["Account"] = relationship("Account", foreign_keys=[to_account_id], back_populates="incoming_transfers")

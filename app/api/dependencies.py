@@ -5,18 +5,10 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.core.auth import decode_token
-from app.database import SessionLocal
+from app.database import SessionLocal, get_db
 from app.models.auth.user import User
 
 security = HTTPBearer(auto_error=False)
-
-
-def get_db() -> Session:
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 class AuthenticationError(Exception):

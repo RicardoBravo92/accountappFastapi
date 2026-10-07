@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 
 from sqlalchemy import (
@@ -37,8 +37,8 @@ class Contact(Base):
     website: Mapped[str] = mapped_column(String(255), nullable=True)
     notes: Mapped[str] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
     company: Mapped["Company"] = relationship("Company", back_populates="contacts")
 

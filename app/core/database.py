@@ -14,9 +14,8 @@ def get_connect_args(database_url: str) -> dict:
 engine = create_engine(
     settings.DATABASE_URL,
     pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
     connect_args=get_connect_args(settings.DATABASE_URL),
+    **settings.get_database_connection_kwargs(),
 )
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()

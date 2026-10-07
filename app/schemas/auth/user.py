@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 
 class UserBase(BaseModel):
@@ -12,7 +12,21 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(min_length=12, max_length=128, description="Password must be 12-128 characters")
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_complexity(cls, v: str) -> str:
+        """Validate password meets complexity requirements."""
+        if not any(c.isupper() for c in v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not any(c.islower() for c in v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not any(c.isdigit() for c in v):
+            raise ValueError("Password must contain at least one digit")
+        if not any(c in "!@#$%^&*()_+-=" for c in v):
+            raise ValueError("Password must contain at least one special character (!@#$%^&*()_+-=)")
+        return v
 
 
 class UserUpdate(BaseModel):

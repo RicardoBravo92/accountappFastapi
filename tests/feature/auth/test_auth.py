@@ -10,7 +10,7 @@ def test_user(db_session):
     user = User(
         email="test@example.com",
         username="testuser",
-        password_hash=hash_password("testpassword123"),
+        password_hash=hash_password("TestPassword123!"),
         first_name="Test",
         last_name="User",
         role="admin",
@@ -29,7 +29,7 @@ def auth_token(client, test_user):
         "/api/v1/auth/login",
         data={
             "username": "test@example.com",
-            "password": "testpassword123",
+            "password": "TestPassword123!",
         },
     )
     assert response.status_code == 200, f"Login failed: {response.json()}"
@@ -59,7 +59,7 @@ class TestAuthEndpoints:
             json={
                 "email": "newuser@example.com",
                 "username": "newuser",
-                "password": "securepassword123",
+                "password": "SecurePass123!",
                 "first_name": "New",
                 "last_name": "User",
             },
@@ -78,7 +78,7 @@ class TestAuthEndpoints:
             json={
                 "email": "test@example.com",
                 "username": "different_user",
-                "password": "password123",
+                "password": "AnotherPass123!",
                 "first_name": "Dup",
                 "last_name": "User",
             },
@@ -92,7 +92,7 @@ class TestAuthEndpoints:
             "/api/v1/auth/login",
             data={
                 "username": "test@example.com",
-                "password": "testpassword123",
+                "password": "TestPassword123!",
             },
         )
         assert response.status_code == 200
@@ -134,7 +134,7 @@ class TestAuthEndpoints:
             json={
                 "email": "hashcheck@example.com",
                 "username": "hashcheck",
-                "password": "plaintextpassword",
+                "password": "PlainTextPass123!",
                 "first_name": "Hash",
                 "last_name": "Check",
             },
@@ -143,5 +143,5 @@ class TestAuthEndpoints:
 
         user = db_session.query(User).filter(User.email == "hashcheck@example.com").first()
         assert user is not None
-        assert user.password_hash != "plaintextpassword"
+        assert user.password_hash != "PlainTextPass123!"
         assert len(user.password_hash) > 20  # Bcrypt hashes are long
