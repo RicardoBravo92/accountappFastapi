@@ -5,8 +5,16 @@ from sqlalchemy.exc import IntegrityError
 from app.api.dependencies import get_current_user, get_db
 from app.core.auth import create_access_token, decode_token
 from app.models.auth.user import User
-from app.schemas.auth import Token, UserCreate, UserResponse
-from app.services.auth.user_service import create_user, authenticate_user
+from app.schemas.auth import Token, UserCreate, UserResponse, RefreshTokenResponse
+from app.services.auth.user_service import (
+    create_user,
+    authenticate_user,
+    create_refresh_token,
+    verify_and_rotate_refresh_token,
+    revoke_refresh_token,
+    revoke_all_user_tokens,
+)
+from app.services.audit import AuditLogger, AuditAction
 from app.services.rate_limit import check_login_rate_limit
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -20,9 +28,13 @@ router = APIRouter(prefix="/auth", tags=["auth"])
     description="Create a new user account with email, username, password, and profile information. Returns the created user object without password hash.",
     response_description="Successfully created user",
 )
-def register(user_data: UserCreate, db: Session = Depends(get_db)):
+def register(user_data: UserCreate, request: Request, db: Session = Depends(get_db)):
     try:
-        return create_user(db, **user_data.model_dump())
+        user = create_user(db, **user_data.model_dump())
+        # Audit log
+        audit = AuditLogger(db)
+        audit.user_create(user.id, request=request)
+        return user
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -30,10 +42,10 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
 
 @router.post(
     "/login",
-    response_model=Token,
+    response_model=RefreshTokenResponse,
     summary="User login",
-    description="Authenticate user with email and password. Returns access token for API authentication. Rate limited to 5 attempts per minute per email.",
-    response_description="Access token with bearer type",
+    description="Authenticate user with email and password. Returns access token and refresh token for API authentication. Rate limited to 5 attempts per minute per email.",
+    response_description="Access token and refresh token with bearer type",
 )
 def login(
     request: Request,
@@ -44,12 +56,22 @@ def login(
     # Check login rate limit before authentication
     check_login_rate_limit(request, username)
     
+    audit = AuditLogger(db)
     user = authenticate_user(db, username, password)
     if not user:
+        audit.login_failed(username, request=request, reason="invalid_credentials")
         raise HTTPException(status_code=401, detail="Incorrect email or password")
 
     access_token = create_access_token(data={"user_id": user.id})
-    return {"access_token": access_token, "token_type": "bearer"}
+    refresh_token = create_refresh_token(db, user.id)
+    
+    audit.login_success(user.id, request=request)
+    
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
 
 
 @router.get(
@@ -67,24 +89,71 @@ def get_me(current_user: User = Depends(get_current_user)):
 
 @router.post(
     "/refresh",
-    response_model=Token,
-    summary="Refresh access token",
-    description="Obtain a new access token using a valid refresh token. Refresh tokens expire after 7 days.",
-    response_description="New access token with bearer type",
+    response_model=RefreshTokenResponse,
+    summary="Refresh access token with rotation",
+    description="Obtain a new access token and refresh token using a valid refresh token. The old refresh token is revoked (rotation).",
+    response_description="New access token and refresh token with bearer type",
 )
 def refresh_token(refresh_token: str = Form(..., description="Refresh token"), db: Session = Depends(get_db)):
-    """Refresh access token using a valid refresh token."""
+    """Refresh access token using a valid refresh token with rotation."""
+    result = verify_and_rotate_refresh_token(db, refresh_token)
+    if not result:
+        # Audit failed refresh attempt
+        audit = AuditLogger(db)
+        # Try to decode to get user_id for audit
+        from app.core.auth import decode_token
+        payload = decode_token(refresh_token)
+        user_id = payload.get("user_id") if payload else None
+        audit.log(
+            action=AuditAction.TOKEN_REFRESH_FAILED,
+            user_id=user_id,
+            request=Request,
+            status_code=401,
+            details={"reason": "invalid_or_expired"},
+        )
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+    
+    # Audit successful token refresh
     payload = decode_token(refresh_token)
-    if not payload or payload.get("type") != "refresh":
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    user_id = payload.get("user_id") if payload else None
+    audit = AuditLogger(db)
+    audit.token_refresh(user_id, request=request)
+    
+    return result
 
-    user_id = payload.get("user_id")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Invalid token payload")
 
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user or not user.is_active:
-        raise HTTPException(status_code=401, detail="User not found or inactive")
+@router.post(
+    "/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Logout and revoke refresh token",
+    description="Revoke the current refresh token to logout the user.",
+)
+def logout(request: Request, refresh_token: str = Form(..., description="Refresh token to revoke"), db: Session = Depends(get_db)):
+    """Revoke refresh token on logout."""
+    revoke_refresh_token(db, refresh_token)
+    
+    # Audit logout
+    from app.core.auth import decode_token
+    payload = decode_token(refresh_token)
+    user_id = payload.get("user_id") if payload else None
+    audit = AuditLogger(db)
+    audit.logout(user_id, request=request)
+    
+    return None
 
-    access_token = create_access_token(data={"user_id": user.id})
-    return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post(
+    "/logout-all",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Logout from all devices",
+    description="Revoke all refresh tokens for the current user.",
+)
+def logout_all(request: Request, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Revoke all refresh tokens for the current user."""
+    revoke_all_user_tokens(db, current_user.id)
+    
+    # Audit logout all
+    audit = AuditLogger(db)
+    audit.logout_all(current_user.id, request=request)
+    
+    return None

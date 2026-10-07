@@ -9,9 +9,11 @@ from functools import wraps
 from typing import Callable, List, Set
 
 from fastapi import Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
 from app.core.exceptions import ForbiddenError
 from app.api.dependencies import get_current_user
+from app.database import get_db
 from app.models.auth.user import User, UserRole
 
 
@@ -80,6 +82,14 @@ class Permission(str, Enum):
     UPLOAD_DELETE = "upload:delete"
     UPLOAD_LIST = "upload:list"
     
+    # Webhook permissions
+    WEBHOOK_CREATE = "webhook:create"
+    WEBHOOK_READ = "webhook:read"
+    WEBHOOK_UPDATE = "webhook:update"
+    WEBHOOK_DELETE = "webhook:delete"
+    WEBHOOK_LIST = "webhook:list"
+    WEBHOOK_TRIGGER = "webhook:trigger"
+    
     # Category permissions
     CATEGORY_CREATE = "category:create"
     CATEGORY_READ = "category:read"
@@ -147,6 +157,8 @@ ROLE_PERMISSIONS: dict[UserRole, Set[Permission]] = {
         Permission.ITEM_DELETE, Permission.ITEM_LIST,
         Permission.TRANSFER_CREATE, Permission.TRANSFER_READ, Permission.TRANSFER_UPDATE,
         Permission.TRANSFER_DELETE, Permission.TRANSFER_LIST,
+        Permission.WEBHOOK_CREATE, Permission.WEBHOOK_READ, Permission.WEBHOOK_UPDATE,
+        Permission.WEBHOOK_DELETE, Permission.WEBHOOK_LIST, Permission.WEBHOOK_TRIGGER,
     },
     UserRole.MANAGER: {
         # Manager has most permissions except user management and settings
@@ -175,6 +187,8 @@ ROLE_PERMISSIONS: dict[UserRole, Set[Permission]] = {
         Permission.ITEM_LIST,
         Permission.TRANSFER_CREATE, Permission.TRANSFER_READ, Permission.TRANSFER_UPDATE,
         Permission.TRANSFER_LIST,
+        Permission.WEBHOOK_CREATE, Permission.WEBHOOK_READ, Permission.WEBHOOK_UPDATE,
+        Permission.WEBHOOK_DELETE, Permission.WEBHOOK_LIST,
     },
     UserRole.ACCOUNTANT: {
         # Accountant has financial permissions
@@ -196,6 +210,7 @@ ROLE_PERMISSIONS: dict[UserRole, Set[Permission]] = {
         Permission.CURRENCY_READ, Permission.CURRENCY_LIST,
         Permission.ITEM_READ, Permission.ITEM_LIST,
         Permission.TRANSFER_READ, Permission.TRANSFER_LIST,
+        Permission.WEBHOOK_READ, Permission.WEBHOOK_TRIGGER,
     },
     UserRole.VIEWER: {
         # Viewer has read-only permissions
@@ -213,6 +228,7 @@ ROLE_PERMISSIONS: dict[UserRole, Set[Permission]] = {
         Permission.CURRENCY_READ, Permission.CURRENCY_LIST,
         Permission.ITEM_READ, Permission.ITEM_LIST,
         Permission.TRANSFER_READ, Permission.TRANSFER_LIST,
+        Permission.WEBHOOK_READ,
     },
 }
 
@@ -327,13 +343,9 @@ class RequireCompanyAccess:
         self,
         company_id: int,
         current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
     ) -> User:
-        from app.api.dependencies import get_db
-        from sqlalchemy.orm import Session
-        
-        # We need to get db session here - this is a bit tricky with FastAPI
-        # For now, we'll check role-based permission
-        # Company ownership check would need a different approach
+        from app.models.auth.user import UserCompany
         
         user_role = UserRole(current_user.role)
         
@@ -341,12 +353,22 @@ class RequireCompanyAccess:
         if user_role == UserRole.ADMIN:
             return current_user
         
+        # Check if user is owner of the company
+        if self.allow_owner:
+            is_owner = db.query(UserCompany).filter(
+                UserCompany.user_id == current_user.id,
+                UserCompany.company_id == company_id,
+                UserCompany.is_owner == True
+            ).first()
+            
+            if is_owner:
+                return current_user
+        
         # Check role-based permission
         if has_permission(user_role, self.permission):
             return current_user
         
         # If we get here, user doesn't have permission
-        # In a full implementation, we'd also check company ownership
         raise ForbiddenError(
             f"Access denied to company {company_id}. "
             f"Permission '{self.permission.value}' required."
@@ -467,6 +489,15 @@ UPLOAD_PERMISSIONS = {
     "read": Permission.UPLOAD_READ,
     "delete": Permission.UPLOAD_DELETE,
     "list": Permission.UPLOAD_LIST,
+}
+
+WEBHOOK_PERMISSIONS = {
+    "create": Permission.WEBHOOK_CREATE,
+    "read": Permission.WEBHOOK_READ,
+    "update": Permission.WEBHOOK_UPDATE,
+    "delete": Permission.WEBHOOK_DELETE,
+    "list": Permission.WEBHOOK_LIST,
+    "trigger": Permission.WEBHOOK_TRIGGER,
 }
 
 SETTINGS_PERMISSIONS = {

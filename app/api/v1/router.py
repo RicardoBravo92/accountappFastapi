@@ -17,6 +17,7 @@ from app.api.v1.endpoints.taxes import router as taxes_router
 from app.api.v1.endpoints.currencies import router as currencies_router
 from app.api.v1.endpoints.reports import router as reports_router
 from app.api.v1.endpoints.uploads import router as uploads_router
+from app.api.v1.endpoints.webhooks import router as webhooks_router
 
 api_router.include_router(auth_router)
 api_router.include_router(users_router)
@@ -33,3 +34,4 @@ api_router.include_router(currencies_router)
 api_router.include_router(transfers_router)
 api_router.include_router(reports_router)
 api_router.include_router(uploads_router)
+api_router.include_router(webhooks_router)

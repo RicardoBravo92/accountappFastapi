@@ -19,7 +19,10 @@ from app.core.exceptions import (
     BusinessRuleError,
 )
 from app.database import Base, engine
+from app.models.auth.user import RefreshToken  # Ensure audit log table is created
+from app.models.auth.user import AuditLog  # Ensure audit log table is created
 from app.services.rate_limit import rate_limit
+from app.services.rate_limit_redis import rate_limit_manager
 
 logger = get_logger(__name__)
 
@@ -33,10 +36,22 @@ async def lifespan(app: FastAPI):
         # Ensure upload directory exists
         os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
         
+        # Initialize Redis rate limiter
+        if settings.ENVIRONMENT != "test":
+            await rate_limit_manager.initialize()
+        
     except SQLAlchemyError as e:
         logger.error(f"Database initialization failed: {str(e)}")
+    except Exception as e:
+        logger.warning(f"Redis initialization failed, using in-memory fallback: {str(e)}")
         
     yield
+    
+    # Cleanup
+    try:
+        await rate_limit_manager.close()
+    except Exception as e:
+        logger.warning(f"Error closing Redis connection: {str(e)}")
 
 
 def create_app() -> FastAPI:
