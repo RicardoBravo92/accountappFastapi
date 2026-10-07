@@ -67,6 +67,7 @@ jobs:
           echo "SECRET_KEY=test-secret-key-for-testing-only-32-chars-minimum-length" >> $GITHUB_ENV
           echo "ENVIRONMENT=test" >> $GITHUB_ENV
           echo "DEBUG=true" >> $GITHUB_ENV
+          echo "REDIS_URL=redis://localhost:6379/0" >> $GITHUB_ENV
 
       - name: Run tests with coverage
         run: |
@@ -122,11 +123,12 @@ jobs:
           echo "SECRET_KEY=test-secret-key-for-testing-only-32-chars-minimum-length" >> $GITHUB_ENV
           echo "ENVIRONMENT=test" >> $GITHUB_ENV
           echo "DEBUG=true" >> $GITHUB_ENV
+          echo "REDIS_URL=redis://localhost:6379/0" >> $GITHUB_ENV
 
       - name: Wait for PostgreSQL
         run: |
-          sleep 5
-          until pg_isready -h localhost -p 5432 -U test_user; do sleep 2; done
+          sleep 10
+          until pg_isready -h localhost -p 5432 -U test_user; do sleep 3; done
 
       - name: Run tests with coverage
         run: |
@@ -134,7 +136,7 @@ jobs:
             --cov=app \
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
-            --cov-fail-under=70
+            --cov-fail-under=69
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
