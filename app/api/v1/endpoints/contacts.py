@@ -27,6 +27,7 @@ def list_contacts_endpoint(
 ):
     return list_contacts(db, company_id, type, current_user)
 
+
 @router.post("/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
 def create_contact_endpoint(
     contact_data: ContactCreate,
@@ -34,6 +35,7 @@ def create_contact_endpoint(
     current_user: User = Depends(require_permission(CONTACT_PERMISSIONS["create"])),
 ):
     return create_contact(db, contact_data, current_user)
+
 
 @router.get("/{contact_id}", response_model=ContactResponse)
 def get_contact_endpoint(
@@ -43,6 +45,7 @@ def get_contact_endpoint(
 ):
     return get_contact(db, contact_id, current_user)
 
+
 @router.put("/{contact_id}", response_model=ContactResponse)
 def update_contact_endpoint(
     contact_id: int,
@@ -51,6 +54,7 @@ def update_contact_endpoint(
     current_user: User = Depends(require_permission(CONTACT_PERMISSIONS["update"])),
 ):
     return update_contact(db, contact_id, contact_data, current_user)
+
 
 @router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_contact_endpoint(
