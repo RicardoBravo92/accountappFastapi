@@ -210,11 +210,11 @@ def save_upload_file(upload_file: UploadFile) -> str:
     # Prevent path traversal (should be redundant with secure filename, but defense in depth)
     try:
         file_path.resolve().relative_to(Path(settings.UPLOAD_DIR).resolve())
-    except ValueError:
+    except ValueError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid filename",
-        )
+        ) from err
 
     # Save file
     with open(file_path, "wb") as f:
@@ -240,11 +240,11 @@ def get_file_path(filename: str) -> Path:
     # Prevent path traversal
     try:
         file_path.resolve().relative_to(Path(settings.UPLOAD_DIR).resolve())
-    except ValueError:
+    except ValueError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid file path",
-        )
+        ) from err
 
     return file_path
 

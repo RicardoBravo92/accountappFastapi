@@ -243,7 +243,7 @@ async def rate_limit(request: Request, identifier: str | None = None):
         if not rate_limit_manager._redis:
             await rate_limit_manager.initialize()
         await rate_limit_redis(request, identifier)
-    except Exception:
+    except Exception as err:
         # Fallback to in-memory for resilience
         client_id = _fallback_api_limiter._get_client_id(request)
         key = f"{client_id}:{identifier}" if identifier else client_id
@@ -253,7 +253,7 @@ async def rate_limit(request: Request, identifier: str | None = None):
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Rate limit exceeded. Please try again later.",
                 headers={"Retry-After": str(retry_after)},
-            )
+            ) from err
 
 
 async def check_login_rate_limit(request: Request, email: str):
@@ -262,7 +262,7 @@ async def check_login_rate_limit(request: Request, email: str):
         if not rate_limit_manager._redis:
             await rate_limit_manager.initialize()
         await check_login_rate_limit_redis(request, email)
-    except Exception:
+    except Exception as err:
         # Fallback to in-memory for resilience
         client_id = _fallback_login_limiter._get_client_id(request)
         key = f"login:{email}:{client_id}"
@@ -272,4 +272,4 @@ async def check_login_rate_limit(request: Request, email: str):
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Too many login attempts. Please try again later.",
                 headers={"Retry-After": str(retry_after)},
-            )
+            ) from err

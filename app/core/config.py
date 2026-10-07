@@ -1,5 +1,6 @@
 import logging
 from functools import lru_cache
+from typing import Any
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -71,7 +72,9 @@ class Settings(BaseSettings):
             "sslcert", "sslkey", "sslrootcert", "sslcrl", "sslcompression",
             "sslsni", "requirepeer", "ssl_min_protocol_version", "ssl_max_protocol_version",
         }
-        kwargs = {k: v for k, v in url.query.items() if k not in pg_specific_params}
+        # Explicitly type as dict[str, Any] to allow both str and int values
+        # url.query.items() returns dict[str, str] but we add int values for pool settings
+        kwargs: dict[str, Any] = {k: v for k, v in url.query.items() if k not in pg_specific_params}
 
         # Add proper encoding parameters for PostgreSQL
         if self.DATABASE_URL.startswith("postgresql"):

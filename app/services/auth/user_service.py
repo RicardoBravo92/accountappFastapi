@@ -156,7 +156,7 @@ def revoke_all_user_tokens(db: Session, user_id: int) -> int:
     """Revoke all refresh tokens for a user (e.g., on password change, logout all)."""
     count = db.query(RefreshToken).filter(
         RefreshToken.user_id == user_id,
-        not RefreshToken.is_revoked
+        ~RefreshToken.is_revoked
     ).update({
         "is_revoked": True,
         "revoked_at": datetime.now(UTC)

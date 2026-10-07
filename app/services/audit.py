@@ -176,11 +176,14 @@ class AuditLogger:
         return self.log(AuditAction.LOGIN_SUCCESS, user_id=user_id, request=request, status_code=200)
 
     def login_failed(self, email: str, request=None, reason: str = "invalid_credentials"):
+        import hashlib
+        # Hash email to avoid PII leakage in audit logs
+        email_hash = hashlib.sha256(email.encode()).hexdigest()[:12]
         return self.log(
             AuditAction.LOGIN_FAILED,
             request=request,
             status_code=401,
-            details={"email": email, "reason": reason}
+            details={"email_hash": email_hash, "reason": reason}
         )
 
     def logout(self, user_id: int, request=None):

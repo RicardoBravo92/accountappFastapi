@@ -3,12 +3,40 @@
 import hashlib
 import hmac
 import json
+import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
 import httpx
 
 from app.models.webhook import WebhookDelivery, WebhookEndpoint, WebhookEvent
+
+
+def verify_signature(payload: str, signature: str, secret: str) -> bool:
+    """Verify webhook signature using constant-time comparison.
+    
+    Uses hmac.compare_digest() to prevent timing attacks.
+    
+    Args:
+        payload: The raw payload string that was signed
+        signature: The signature to verify (hex digest)
+        secret: The shared secret used for signing
+        
+    Returns:
+        True if signature is valid, False otherwise
+    """
+    expected_signature = hmac.new(
+        secret.encode("utf-8"),
+        payload.encode("utf-8"),
+        hashlib.sha256
+    ).hexdigest()
+    
+    return hmac.compare_digest(expected_signature, signature)
+
+
+def generate_webhook_secret() -> str:
+    """Generate a secure webhook secret."""
+    return secrets.token_urlsafe(32)
 
 
 @dataclass
@@ -112,13 +140,36 @@ class WebhookManager:
         self.db.commit()
         return True
 
-    def _sign_payload(self, payload: str, secret: str) -> str:
+    @staticmethod
+    def _sign_payload(payload: str, secret: str) -> str:
         """Generate HMAC signature for payload."""
         return hmac.new(
             secret.encode("utf-8"),
             payload.encode("utf-8"),
             hashlib.sha256
         ).hexdigest()
+
+    @staticmethod
+    def verify_signature(payload: str, signature: str, secret: str) -> bool:
+        """Verify webhook signature using constant-time comparison.
+        
+        Uses hmac.compare_digest() to prevent timing attacks.
+        
+        Args:
+            payload: The raw payload string that was signed
+            signature: The signature to verify (hex digest)
+            secret: The shared secret used for signing
+            
+        Returns:
+            True if signature is valid, False otherwise
+        """
+        expected_signature = hmac.new(
+            secret.encode("utf-8"),
+            payload.encode("utf-8"),
+            hashlib.sha256
+        ).hexdigest()
+        
+        return hmac.compare_digest(expected_signature, signature)
 
     def _create_payload(self, event: WebhookEvent, company_id: int, data: dict, webhook_id: int, delivery_id: int) -> tuple[str, str]:
         """Create webhook payload and signature."""
