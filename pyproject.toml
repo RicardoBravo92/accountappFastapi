@@ -34,6 +34,8 @@ dev = [
     "ruff>=0.3.0",
     "black>=24.0.0",
     "mypy>=1.8.0",
+    "testcontainers>=4.7.0",
+    "psycopg2-binary>=2.9.9",
 ]
 
 [build-system]

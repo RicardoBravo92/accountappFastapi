@@ -1,16 +1,30 @@
-from fastapi import HTTPException
+from typing import List, Optional
+from sqlalchemy.orm import Session
 
+from app.core.exceptions import NotFoundError
 from app.models.contact import Contact
+from app.schemas.contact import ContactCreate, ContactUpdate
 
 
-async def list_contacts(db, company_id, type=None, current_user=None):
+def list_contacts(
+    db: Session,
+    company_id: int,
+    type: Optional[str] = None,
+    current_user=None,
+) -> List[Contact]:
+    """List contacts for a company."""
     query = db.query(Contact).filter(Contact.company_id == company_id)
     if type:
         query = query.filter(Contact.type == type)
     return query.all()
 
 
-async def create_contact(db, contact_data, current_user):
+def create_contact(
+    db: Session,
+    contact_data: ContactCreate,
+    current_user=None,
+) -> Contact:
+    """Create a new contact."""
     contact = Contact(**contact_data.model_dump())
     db.add(contact)
     db.commit()
@@ -18,15 +32,26 @@ async def create_contact(db, contact_data, current_user):
     return contact
 
 
-async def get_contact(db, contact_id, current_user):
+def get_contact(
+    db: Session,
+    contact_id: int,
+    current_user=None,
+) -> Contact:
+    """Get a contact by ID."""
     contact = db.query(Contact).filter(Contact.id == contact_id).first()
     if not contact:
-        raise HTTPException(status_code=404, detail="Contact not found")
+        raise NotFoundError("Contact", contact_id)
     return contact
 
 
-async def update_contact(db, contact_id, contact_data, current_user):
-    contact = await get_contact(db, contact_id, current_user)
+def update_contact(
+    db: Session,
+    contact_id: int,
+    contact_data: ContactUpdate,
+    current_user=None,
+) -> Contact:
+    """Update a contact."""
+    contact = get_contact(db, contact_id, current_user)
     update_data = contact_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(contact, key, value)
@@ -35,17 +60,13 @@ async def update_contact(db, contact_id, contact_data, current_user):
     return contact
 
 
-async def delete_contact(db, contact_id, current_user):
-    contact = await get_contact(db, contact_id, current_user)
+def delete_contact(
+    db: Session,
+    contact_id: int,
+    current_user=None,
+) -> Contact:
+    """Soft delete a contact."""
+    contact = get_contact(db, contact_id, current_user)
     contact.is_active = False
     db.commit()
     return contact
-
-
-contact_service = {
-    "list_contacts": list_contacts,
-    "create_contact": create_contact,
-    "get_contact": get_contact,
-    "update_contact": update_contact,
-    "delete_contact": delete_contact,
-}

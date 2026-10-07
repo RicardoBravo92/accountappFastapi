@@ -1,50 +1,60 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_db
+from app.core.permissions import (
+    TAX_PERMISSIONS,
+    require_permission,
+)
 from app.models.auth.user import User
-from app.models.tax import Tax
 from app.schemas.tax import TaxCreate, TaxResponse, TaxUpdate
-from app.services.taxes import tax_service
+from app.services.taxes import (
+    list_taxes,
+    create_tax,
+    get_tax,
+    update_tax,
+    delete_tax,
+)
 
 router = APIRouter(prefix="/taxes", tags=["taxes"])
 
 @router.get("/", response_model=list[TaxResponse])
-async def list_taxes(
+def list_taxes_endpoint(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(TAX_PERMISSIONS["list"])),
 ):
-    return await tax_service["list_taxes"](db, current_user)
+    return list_taxes(db, current_user)
 
 @router.post("/", response_model=TaxResponse, status_code=status.HTTP_201_CREATED)
-async def create_tax(
+def create_tax_endpoint(
     tax_data: TaxCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(TAX_PERMISSIONS["create"])),
 ):
-    return await tax_service["create_tax"](db, tax_data, current_user)
+    return create_tax(db, tax_data, current_user)
 
 @router.get("/{tax_id}", response_model=TaxResponse)
-async def get_tax(
+def get_tax_endpoint(
     tax_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(TAX_PERMISSIONS["read"])),
 ):
-    return await tax_service["get_tax"](db, tax_id, current_user)
+    return get_tax(db, tax_id, current_user)
 
 @router.put("/{tax_id}", response_model=TaxResponse)
-async def update_tax(
+def update_tax_endpoint(
     tax_id: int,
     tax_data: TaxUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(TAX_PERMISSIONS["update"])),
 ):
-    return await tax_service["update_tax"](db, tax_id, tax_data, current_user)
+    return update_tax(db, tax_id, tax_data, current_user)
 
 @router.delete("/{tax_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_tax(
+def delete_tax_endpoint(
     tax_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(TAX_PERMISSIONS["delete"])),
 ):
-    return await tax_service["delete_tax"](db, tax_id, current_user)
+    delete_tax(db, tax_id, current_user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

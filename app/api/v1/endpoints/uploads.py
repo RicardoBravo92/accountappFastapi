@@ -1,38 +1,48 @@
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 
 from app.api.dependencies import get_current_user
+from app.core.permissions import (
+    UPLOAD_PERMISSIONS,
+    require_permission,
+)
 from app.models.auth.user import User
-from app.services.uploads import upload_service
+from app.services.uploads import (
+    list_uploads,
+    upload_file,
+    download_file,
+    delete_upload,
+)
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])
 
 
 @router.get("/")
-def list_uploads(
-    current_user: User = Depends(get_current_user),
+def list_uploads_endpoint(
+    current_user: User = Depends(require_permission(UPLOAD_PERMISSIONS["list"])),
 ):
-    return upload_service["list_uploads"]()
+    return list_uploads()
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_upload(
+def create_upload_endpoint(
     file: UploadFile = File(...),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(UPLOAD_PERMISSIONS["create"])),
 ):
-    return upload_service["upload_file"](file)
+    return upload_file(file)
 
 
 @router.get("/{filename}")
-def download_file(
+def download_file_endpoint(
     filename: str,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(UPLOAD_PERMISSIONS["read"])),
 ):
-    return upload_service["download_file"](filename)
+    return download_file(filename)
 
 
 @router.delete("/{filename}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_upload(
+def delete_upload_endpoint(
     filename: str,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(UPLOAD_PERMISSIONS["delete"])),
 ):
-    return upload_service["delete_upload"](filename)
+    delete_upload(filename)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

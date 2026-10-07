@@ -1,51 +1,61 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_db
+from app.core.permissions import (
+    TRANSFER_PERMISSIONS,
+    require_permission,
+)
 from app.models.auth.user import User
-from app.models.transfer import Transfer
 from app.schemas.transfer import TransferCreate, TransferResponse, TransferUpdate
-from app.services.transfers import transfer_service
+from app.services.transfers import (
+    list_transfers,
+    create_transfer,
+    get_transfer,
+    update_transfer,
+    delete_transfer,
+)
 
 router = APIRouter(prefix="/transfers", tags=["transfers"])
 
 @router.get("/", response_model=list[TransferResponse])
-async def list_transfers(
+def list_transfers_endpoint(
     company_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(TRANSFER_PERMISSIONS["list"])),
 ):
-    return await transfer_service["list_transfers"](db, company_id, current_user)
+    return list_transfers(db, company_id, current_user)
 
 @router.post("/", response_model=TransferResponse, status_code=status.HTTP_201_CREATED)
-async def create_transfer(
+def create_transfer_endpoint(
     transfer_data: TransferCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(TRANSFER_PERMISSIONS["create"])),
 ):
-    return await transfer_service["create_transfer"](db, transfer_data, current_user)
+    return create_transfer(db, transfer_data, current_user)
 
 @router.get("/{transfer_id}", response_model=TransferResponse)
-async def get_transfer(
+def get_transfer_endpoint(
     transfer_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(TRANSFER_PERMISSIONS["read"])),
 ):
-    return await transfer_service["get_transfer"](db, transfer_id, current_user)
+    return get_transfer(db, transfer_id, current_user)
 
 @router.put("/{transfer_id}", response_model=TransferResponse)
-async def update_transfer(
+def update_transfer_endpoint(
     transfer_id: int,
     transfer_data: TransferUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(TRANSFER_PERMISSIONS["update"])),
 ):
-    return await transfer_service["update_transfer"](db, transfer_id, transfer_data, current_user)
+    return update_transfer(db, transfer_id, transfer_data, current_user)
 
 @router.delete("/{transfer_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_transfer(
+def delete_transfer_endpoint(
     transfer_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(TRANSFER_PERMISSIONS["delete"])),
 ):
-    return await transfer_service["delete_transfer"](db, transfer_id, current_user)
+    delete_transfer(db, transfer_id, current_user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

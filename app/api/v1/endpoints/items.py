@@ -1,50 +1,60 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_db
+from app.core.permissions import (
+    ITEM_PERMISSIONS,
+    require_permission,
+)
 from app.models.auth.user import User
-from app.models.item import Item
 from app.schemas.item import ItemCreate, ItemResponse, ItemUpdate
-from app.services.items import item_service
+from app.services.items import (
+    list_items,
+    create_item,
+    get_item,
+    update_item,
+    delete_item,
+)
 
 router = APIRouter(prefix="/items", tags=["items"])
 
 @router.get("/", response_model=list[ItemResponse])
-async def list_items(
+def list_items_endpoint(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(ITEM_PERMISSIONS["list"])),
 ):
-    return await item_service["list_items"](db, current_user)
+    return list_items(db, current_user)
 
 @router.post("/", response_model=ItemResponse, status_code=status.HTTP_201_CREATED)
-async def create_item(
+def create_item_endpoint(
     item_data: ItemCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(ITEM_PERMISSIONS["create"])),
 ):
-    return await item_service["create_item"](db, item_data, current_user)
+    return create_item(db, item_data, current_user)
 
 @router.get("/{item_id}", response_model=ItemResponse)
-async def get_item(
+def get_item_endpoint(
     item_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(ITEM_PERMISSIONS["read"])),
 ):
-    return await item_service["get_item"](db, item_id, current_user)
+    return get_item(db, item_id, current_user)
 
 @router.put("/{item_id}", response_model=ItemResponse)
-async def update_item(
+def update_item_endpoint(
     item_id: int,
     item_data: ItemUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(ITEM_PERMISSIONS["update"])),
 ):
-    return await item_service["update_item"](db, item_id, item_data, current_user)
+    return update_item(db, item_id, item_data, current_user)
 
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_item(
+def delete_item_endpoint(
     item_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(ITEM_PERMISSIONS["delete"])),
 ):
-    return await item_service["delete_item"](db, item_id, current_user)
+    delete_item(db, item_id, current_user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

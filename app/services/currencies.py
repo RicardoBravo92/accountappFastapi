@@ -1,13 +1,25 @@
-from fastapi import HTTPException
+from typing import List, Optional
+from sqlalchemy.orm import Session
 
+from app.core.exceptions import NotFoundError
 from app.models.currency import Currency
+from app.schemas.currency import CurrencyCreate, CurrencyUpdate
 
 
-async def list_currencies(db, current_user):
+def list_currencies(
+    db: Session,
+    current_user=None,
+) -> List[Currency]:
+    """List active currencies."""
     return db.query(Currency).filter(Currency.is_active == True).all()
 
 
-async def create_currency(db, currency_data, current_user):
+def create_currency(
+    db: Session,
+    currency_data: CurrencyCreate,
+    current_user=None,
+) -> Currency:
+    """Create a new currency."""
     currency = Currency(**currency_data.model_dump())
     db.add(currency)
     db.commit()
@@ -15,14 +27,25 @@ async def create_currency(db, currency_data, current_user):
     return currency
 
 
-async def get_currency(db, currency_id, current_user):
+def get_currency(
+    db: Session,
+    currency_id: int,
+    current_user=None,
+) -> Currency:
+    """Get a currency by ID."""
     currency = db.query(Currency).filter(Currency.id == currency_id).first()
     if not currency:
-        raise HTTPException(status_code=404, detail="Currency not found")
+        raise NotFoundError("Currency", currency_id)
     return currency
 
 
-async def update_currency(db, currency_id, currency_data, current_user):
+def update_currency(
+    db: Session,
+    currency_id: int,
+    currency_data: CurrencyUpdate,
+    current_user=None,
+) -> Currency:
+    """Update a currency."""
     currency = get_currency(db, currency_id, current_user)
     update_data = currency_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
@@ -32,17 +55,12 @@ async def update_currency(db, currency_id, currency_data, current_user):
     return currency
 
 
-async def delete_currency(db, currency_id, current_user):
+def delete_currency(
+    db: Session,
+    currency_id: int,
+    current_user=None,
+) -> None:
+    """Delete a currency."""
     currency = get_currency(db, currency_id, current_user)
     db.delete(currency)
     db.commit()
-    return currency
-
-
-currency_service = {
-    "list_currencies": list_currencies,
-    "create_currency": create_currency,
-    "get_currency": get_currency,
-    "update_currency": update_currency,
-    "delete_currency": delete_currency,
-}

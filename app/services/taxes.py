@@ -1,26 +1,53 @@
+from typing import List, Optional
+from sqlalchemy.orm import Session
 
-from fastapi import HTTPException
+from app.core.exceptions import NotFoundError
 from app.models.tax import Tax
-async def list_taxes(db, company_id, current_user):
+from app.schemas.tax import TaxCreate, TaxUpdate
+
+
+def list_taxes(
+    db: Session,
+    company_id: int,
+    current_user=None,
+) -> List[Tax]:
+    """List taxes for a company."""
     return db.query(Tax).filter(Tax.company_id == company_id).all()
 
-async def create_tax(db, tax_data, current_user):
+
+def create_tax(
+    db: Session,
+    tax_data: TaxCreate,
+    current_user=None,
+) -> Tax:
+    """Create a new tax."""
     tax = Tax(**tax_data.model_dump())
     db.add(tax)
     db.commit()
     db.refresh(tax)
     return tax
 
-async def get_tax(db, tax_id, current_user):
+
+def get_tax(
+    db: Session,
+    tax_id: int,
+    current_user=None,
+) -> Tax:
+    """Get a tax by ID."""
     tax = db.query(Tax).filter(Tax.id == tax_id).first()
     if not tax:
-        raise HTTPException(status_code=404, detail="Tax not found")
+        raise NotFoundError("Tax", tax_id)
     return tax
 
-async def update_tax(db, tax_id, tax_data, current_user):
-    tax = db.query(Tax).filter(Tax.id == tax_id).first()
-    if not tax:
-        raise HTTPException(status_code=404, detail="Tax not found")
+
+def update_tax(
+    db: Session,
+    tax_id: int,
+    tax_data: TaxUpdate,
+    current_user=None,
+) -> Tax:
+    """Update a tax."""
+    tax = get_tax(db, tax_id, current_user)
     update_data = tax_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(tax, key, value)
@@ -28,18 +55,13 @@ async def update_tax(db, tax_id, tax_data, current_user):
     db.refresh(tax)
     return tax
 
-async def delete_tax(db, tax_id, current_user):
-    tax = db.query(Tax).filter(Tax.id == tax_id).first()
-    if not tax:
-        raise HTTPException(status_code=404, detail="Tax not found")
+
+def delete_tax(
+    db: Session,
+    tax_id: int,
+    current_user=None,
+) -> None:
+    """Soft delete a tax."""
+    tax = get_tax(db, tax_id, current_user)
     tax.is_active = False
     db.commit()
-
-
-tax_service = {
-    "list_taxes": list_taxes,
-    "create_tax": create_tax,
-    "get_tax": get_tax,
-    "update_tax": update_tax,
-    "delete_tax": delete_tax,
-}

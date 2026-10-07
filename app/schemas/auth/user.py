@@ -2,13 +2,15 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.schemas.sanitized_base import SanitizedBaseModel, SanitizedStr
 
-class UserBase(BaseModel):
-    email: str
-    username: str
-    first_name: str
-    last_name: str
-    role: str | None = "viewer"
+
+class UserBase(SanitizedBaseModel):
+    email: SanitizedStr
+    username: SanitizedStr
+    first_name: SanitizedStr
+    last_name: SanitizedStr
+    role: SanitizedStr | None = "viewer"
 
 
 class UserCreate(UserBase):
@@ -29,18 +31,18 @@ class UserCreate(UserBase):
         return v
 
 
-class UserUpdate(BaseModel):
-    email: str | None = None
-    username: str | None = None
-    first_name: str | None = None
-    last_name: str | None = None
-    role: str | None = None
+class UserUpdate(SanitizedBaseModel):
+    email: SanitizedStr | None = None
+    username: SanitizedStr | None = None
+    first_name: SanitizedStr | None = None
+    last_name: SanitizedStr | None = None
+    role: SanitizedStr | None = None
     is_active: bool | None = None
 
 
-class UserLogin(BaseModel):
-    email: str
-    password: str
+class UserLogin(SanitizedBaseModel):
+    email: SanitizedStr
+    password: str  # Don't sanitize password - it would break validation
 
 
 class UserResponse(UserBase):

@@ -1,7 +1,7 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
 
+from app.core.exceptions import NotFoundError
 from app.models import Company
 from app.schemas.company import CompanyCreate, CompanyUpdate
 
@@ -10,7 +10,7 @@ def get_company(db: Session, company_id: int, current_user) -> Company:
     """Get a company by ID."""
     company = db.query(Company).filter(Company.id == company_id).first()
     if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
+        raise NotFoundError("Company", company_id)
     return company
 
 
@@ -18,7 +18,7 @@ def update_company(db: Session, company_id: int, company_data: CompanyUpdate, cu
     """Update a company."""
     company = db.query(Company).filter(Company.id == company_id).first()
     if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
+        raise NotFoundError("Company", company_id)
     update_data = company_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(company, key, value)
@@ -31,7 +31,7 @@ def delete_company(db: Session, company_id: int, current_user) -> Company:
     """Soft delete a company."""
     company = db.query(Company).filter(Company.id == company_id).first()
     if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
+        raise NotFoundError("Company", company_id)
     company.is_active = False
     db.commit()
     return company

@@ -2,7 +2,7 @@
 from sqlalchemy.orm import Session
 
 from app.core.auth import hash_password, verify_password
-from app.models.auth.user import User, UserRole
+from app.models.auth.user import User, UserRole, UserCompany
 
 
 def authenticate_user(db: Session, email: str, password: str) -> User | None:
@@ -36,7 +36,13 @@ def create_user(db: Session, **data) -> User:
 
 
 def list_users(db: Session, company_id: int) -> list[User]:
-    return db.query(User).all()
+    """List users belonging to a specific company."""
+    return (
+        db.query(User)
+        .join(User.companies)
+        .filter(UserCompany.company_id == company_id)
+        .all()
+    )
 
 
 def update_user(db: Session, user_id: int, **data) -> User | None:

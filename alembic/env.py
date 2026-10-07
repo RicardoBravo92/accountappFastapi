@@ -9,9 +9,13 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
+from app.core.config import settings
 from app.database import Base
 
 config = context.config
+
+# Override sqlalchemy.url with settings value
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

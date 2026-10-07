@@ -1,28 +1,56 @@
+from typing import List, Optional
+from sqlalchemy.orm import Session
 
-from fastapi import HTTPException
-
+from app.core.exceptions import NotFoundError
 from app.models.item import Item
+from app.schemas.item import ItemCreate, ItemUpdate
 
-async def get_item(db, item_id, current_user) -> Item:
-    item = db.query(Item).filter(Item.id == item_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return item
 
-async def list_items(db, company_id, current_user, category_id=None):
-    query = db.query(Item).filter(Item.company_id == company_id, Item.user_id == current_user.id)
+def list_items(
+    db: Session,
+    company_id: int,
+    current_user=None,
+    category_id: Optional[int] = None,
+) -> List[Item]:
+    """List items for a company."""
+    query = db.query(Item).filter(Item.company_id == company_id)
     if category_id:
         query = query.filter(Item.category_id == category_id)
     return query.all()
 
-async def create_item(db, item_data, current_user):
+
+def create_item(
+    db: Session,
+    item_data: ItemCreate,
+    current_user=None,
+) -> Item:
+    """Create a new item."""
     item = Item(**item_data.model_dump())
     db.add(item)
     db.commit()
     db.refresh(item)
     return item
 
-async def update_item(db, item_id, item_data, current_user):
+
+def get_item(
+    db: Session,
+    item_id: int,
+    current_user=None,
+) -> Item:
+    """Get an item by ID."""
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        raise NotFoundError("Item", item_id)
+    return item
+
+
+def update_item(
+    db: Session,
+    item_id: int,
+    item_data: ItemUpdate,
+    current_user=None,
+) -> Item:
+    """Update an item."""
     item = get_item(db, item_id, current_user)
     update_data = item_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
@@ -31,17 +59,13 @@ async def update_item(db, item_id, item_data, current_user):
     db.refresh(item)
     return item
 
-async def delete_item(db, item_id, current_user):
+
+def delete_item(
+    db: Session,
+    item_id: int,
+    current_user=None,
+) -> None:
+    """Soft delete an item."""
     item = get_item(db, item_id, current_user)
     item.is_active = False
     db.commit()
-    return item
-
-
-item_service = {
-    "get_item": get_item,
-    "list_items": list_items,
-    "create_item": create_item,
-    "update_item": update_item,
-    "delete_item": delete_item,
-}

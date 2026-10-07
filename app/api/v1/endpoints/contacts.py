@@ -1,52 +1,62 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_db
+from app.core.permissions import (
+    CONTACT_PERMISSIONS,
+    require_permission,
+)
 from app.models.auth.user import User
-from app.models.contact import Contact
 from app.schemas.contact import ContactCreate, ContactResponse, ContactUpdate
-from app.services.contacts import contact_service
+from app.services.contacts import (
+    list_contacts,
+    create_contact,
+    get_contact,
+    update_contact,
+    delete_contact,
+)
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
 
 @router.get("/", response_model=list[ContactResponse])
-async def list_contacts(
+def list_contacts_endpoint(
     company_id: int = Query(...),
     type: str | None = Query(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(CONTACT_PERMISSIONS["list"])),
 ):
-    return await contact_service["list_contacts"](db, company_id, type, current_user)
+    return list_contacts(db, company_id, type, current_user)
 
 @router.post("/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
-async def create_contact(
+def create_contact_endpoint(
     contact_data: ContactCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(CONTACT_PERMISSIONS["create"])),
 ):
-    return await contact_service["create_contact"](db, contact_data, current_user)
+    return create_contact(db, contact_data, current_user)
 
 @router.get("/{contact_id}", response_model=ContactResponse)
-async def get_contact(
+def get_contact_endpoint(
     contact_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(CONTACT_PERMISSIONS["read"])),
 ):
-    return await contact_service["get_contact"](db, contact_id, current_user)
+    return get_contact(db, contact_id, current_user)
 
 @router.put("/{contact_id}", response_model=ContactResponse)
-async def update_contact(
+def update_contact_endpoint(
     contact_id: int,
     contact_data: ContactUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(CONTACT_PERMISSIONS["update"])),
 ):
-    return await contact_service["update_contact"](db, contact_id, contact_data, current_user)
+    return update_contact(db, contact_id, contact_data, current_user)
 
 @router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_contact(
+def delete_contact_endpoint(
     contact_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(CONTACT_PERMISSIONS["delete"])),
 ):
-    return await contact_service["delete_contact"](db, contact_id, current_user)
+    delete_contact(db, contact_id, current_user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

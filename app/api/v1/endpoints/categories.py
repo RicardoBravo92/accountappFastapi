@@ -1,52 +1,62 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_db
+from app.core.permissions import (
+    CATEGORY_PERMISSIONS,
+    require_permission,
+)
 from app.models.auth.user import User
-from app.models.category import Category
 from app.schemas.category import CategoryCreate, CategoryResponse, CategoryUpdate
-from app.services.categories import category_service
+from app.services.categories import (
+    list_categories,
+    create_category,
+    get_category,
+    update_category,
+    delete_category,
+)
 
 router = APIRouter(prefix="/categories", tags=["categories"])
 
 @router.get("/", response_model=list[CategoryResponse])
-async def list_categories(
+def list_categories_endpoint(
     company_id: int,
     type: str | None = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(CATEGORY_PERMISSIONS["list"])),
 ):
-    return await category_service["list_categories"](db, company_id, type, current_user)
+    return list_categories(db, company_id, type, current_user)
 
 @router.post("/", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
-async def create_category(
+def create_category_endpoint(
     category_data: CategoryCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(CATEGORY_PERMISSIONS["create"])),
 ):
-    return await category_service["create_category"](db, category_data, current_user)
+    return create_category(db, category_data, current_user)
 
 @router.get("/{category_id}", response_model=CategoryResponse)
-async def get_category(
+def get_category_endpoint(
     category_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(CATEGORY_PERMISSIONS["read"])),
 ):
-    return await category_service["get_category"](db, category_id, current_user)
+    return get_category(db, category_id, current_user)
 
 @router.put("/{category_id}", response_model=CategoryResponse)
-async def update_category(
+def update_category_endpoint(
     category_id: int,
     category_data: CategoryUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(CATEGORY_PERMISSIONS["update"])),
 ):
-    return await category_service["update_category"](db, category_id, category_data, current_user)
+    return update_category(db, category_id, category_data, current_user)
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_category(
+def delete_category_endpoint(
     category_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(CATEGORY_PERMISSIONS["delete"])),
 ):
-    return await category_service["delete_category"](db, category_id, current_user)
+    delete_category(db, category_id, current_user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
