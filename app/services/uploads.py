@@ -1,4 +1,7 @@
+from datetime import datetime
+import os
 from fastapi import File, HTTPException, UploadFile, status
+from fastapi.responses import FileResponse
 
 from app.config import settings
 from app.core.exceptions import NotFoundError, ValidationError
@@ -37,12 +40,21 @@ async def upload_file(file: UploadFile = File(...)):
 
     # Save file (includes all other validations)
     filename = save_upload_file(file)
+    file_path = get_file_path(filename)
+    stat = file_path.stat()
 
-    return {"filename": filename, "message": "File uploaded successfully"}
+    return {
+        "filename": filename,
+        "message": "File uploaded successfully",
+        "size": stat.st_size,
+        "content_type": file.content_type,
+        "created_at": datetime.fromtimestamp(stat.st_ctime),
+    }
 
 
 async def list_uploads():
-    return list_upload_files()
+    files = list_upload_files()
+    return {"files": files, "count": len(files)}
 
 
 async def download_file(filename: str):
@@ -54,8 +66,13 @@ async def download_file(filename: str):
     if not file_path.exists():
         raise NotFoundError("File", filename)
 
-    from fastapi.responses import FileResponse
-    return FileResponse(file_path, filename=filename)
+    stat = file_path.stat()
+    # Return metadata for response model
+    return {
+        "filename": filename,
+        "content_type": "application/octet-stream",  # Will be detected by FileResponse
+        "size": stat.st_size,
+    }
 
 
 async def delete_upload(filename: str):
@@ -70,4 +87,5 @@ upload_service = {
     "list_uploads": list_uploads,
     "download_file": download_file,
     "delete_upload": delete_upload,
+    "get_file_path": get_file_path,
 }

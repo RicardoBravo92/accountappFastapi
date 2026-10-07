@@ -12,7 +12,14 @@ from app.services.rate_limit import check_login_rate_limit
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register a new user",
+    description="Create a new user account with email, username, password, and profile information. Returns the created user object without password hash.",
+    response_description="Successfully created user",
+)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
     try:
         return create_user(db, **user_data.model_dump())
@@ -21,11 +28,17 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email already registered")
 
 
-@router.post("/login", response_model=Token)
+@router.post(
+    "/login",
+    response_model=Token,
+    summary="User login",
+    description="Authenticate user with email and password. Returns access token for API authentication. Rate limited to 5 attempts per minute per email.",
+    response_description="Access token with bearer type",
+)
 def login(
     request: Request,
-    username: str = Form(...),
-    password: str = Form(...),
+    username: str = Form(..., description="User email address"),
+    password: str = Form(..., description="User password"),
     db: Session = Depends(get_db),
 ):
     # Check login rate limit before authentication
@@ -39,15 +52,27 @@ def login(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get(
+    "/me",
+    response_model=UserResponse,
+    summary="Get current user profile",
+    description="Retrieve the authenticated user's profile information. Requires valid access token.",
+    response_description="Current user profile",
+)
 def get_me(current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     return current_user
 
 
-@router.post("/refresh", response_model=Token)
-def refresh_token(refresh_token: str = Form(...), db: Session = Depends(get_db)):
+@router.post(
+    "/refresh",
+    response_model=Token,
+    summary="Refresh access token",
+    description="Obtain a new access token using a valid refresh token. Refresh tokens expire after 7 days.",
+    response_description="New access token with bearer type",
+)
+def refresh_token(refresh_token: str = Form(..., description="Refresh token"), db: Session = Depends(get_db)):
     """Refresh access token using a valid refresh token."""
     payload = decode_token(refresh_token)
     if not payload or payload.get("type") != "refresh":
