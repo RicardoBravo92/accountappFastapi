@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import get_db
 from app.core.permissions import (
     ITEM_PERMISSIONS,
     require_permission,
@@ -9,11 +9,11 @@ from app.core.permissions import (
 from app.models.auth.user import User
 from app.schemas.item import ItemCreate, ItemResponse, ItemUpdate
 from app.services.items import (
-    list_items,
     create_item,
-    get_item,
-    update_item,
     delete_item,
+    get_item,
+    list_items,
+    update_item,
 )
 
 router = APIRouter(prefix="/items", tags=["items"])

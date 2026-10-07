@@ -75,7 +75,7 @@ class Settings(BaseSettings):
 
     def validate_production_settings(self) -> list[str]:
         """Validate settings for production environment.
-        
+
         Returns a list of validation warning messages.
         """
         warnings = []

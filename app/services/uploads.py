@@ -1,7 +1,6 @@
 from datetime import datetime
-import os
-from fastapi import File, HTTPException, UploadFile, status
-from fastapi.responses import FileResponse
+
+from fastapi import File, HTTPException, UploadFile
 
 from app.config import settings
 from app.core.exceptions import NotFoundError, ValidationError

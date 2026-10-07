@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import get_db
 from app.core.permissions import (
     TRANSACTION_PERMISSIONS,
     require_permission,
@@ -13,11 +13,11 @@ from app.schemas.transaction import (
     TransactionUpdate,
 )
 from app.services.transactions import (
-    list_transactions,
     create_transaction,
-    get_transaction,
-    update_transaction,
     delete_transaction,
+    get_transaction,
+    list_transactions,
+    update_transaction,
 )
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])

@@ -1,13 +1,12 @@
 import time
 from collections import defaultdict
-from typing import Optional
 
 from fastapi import HTTPException, Request, status
 
 
 class RateLimiter:
     """Simple in-memory rate limiter.
-    
+
     For production, replace with Redis-based rate limiting.
     """
 
@@ -25,10 +24,10 @@ class RateLimiter:
 
     def is_allowed(self, key: str) -> bool:
         """Check if a request is allowed under the rate limit.
-        
+
         Args:
             key: Rate limit key (e.g., client IP, email for login attempts)
-            
+
         Returns:
             True if request is allowed, False if rate limited
         """
@@ -56,9 +55,9 @@ api_rate_limiter = RateLimiter(max_requests=100, window_seconds=60)
 login_rate_limiter = RateLimiter(max_requests=5, window_seconds=60)
 
 
-def rate_limit(request: Request, identifier: Optional[str] = None):
+def rate_limit(request: Request, identifier: str | None = None):
     """Check rate limit and raise HTTPException if exceeded.
-    
+
     Args:
         request: FastAPI request object
         identifier: Additional identifier (e.g., email for login attempts)
@@ -76,7 +75,7 @@ def rate_limit(request: Request, identifier: Optional[str] = None):
 
 def check_login_rate_limit(request: Request, email: str):
     """Check login rate limit and raise HTTPException if exceeded.
-    
+
     Args:
         request: FastAPI request object
         email: User email being attempted

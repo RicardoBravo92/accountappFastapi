@@ -1,12 +1,12 @@
 
 
 from sqlalchemy.orm import Session
+
 from app.models.auth.user import User
 from app.models.bill import Bill, BillStatus
 from app.schemas.bill import BillCreate, BillResponse, BillUpdate
 
 
-    
 async def get_all_bills(
         db: Session,
         company_id: int,
@@ -80,4 +80,3 @@ bills_service = {
     "update_bill": update_bill,
     "delete_bill": delete_bill,
 }
-        

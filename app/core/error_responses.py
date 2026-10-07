@@ -1,6 +1,5 @@
 """Standardized error response models following RFC 7807 Problem Details."""
 
-from typing import Any
 from pydantic import BaseModel, Field
 
 

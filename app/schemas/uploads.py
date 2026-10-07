@@ -1,7 +1,6 @@
 """Upload schemas."""
 
 from datetime import datetime
-from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -11,15 +10,15 @@ class UploadResponse(BaseModel):
 
     filename: str
     message: str
-    size: Optional[int] = None
-    content_type: Optional[str] = None
-    created_at: Optional[datetime] = None
+    size: int | None = None
+    content_type: str | None = None
+    created_at: datetime | None = None
 
 
 class UploadListResponse(BaseModel):
     """List of uploads response."""
 
-    files: List[str]
+    files: list[str]
     count: int
 
 

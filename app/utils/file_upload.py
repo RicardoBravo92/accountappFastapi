@@ -7,7 +7,6 @@ from PIL import Image, UnidentifiedImageError
 
 from app.config import settings
 
-
 # Allowed MIME types for uploads
 ALLOWED_MIME_TYPES = {
     # Images

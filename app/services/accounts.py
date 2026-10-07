@@ -1,4 +1,4 @@
-from typing import List, Optional
+
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundError
@@ -9,9 +9,9 @@ from app.schemas.account import AccountCreate, AccountUpdate
 def get_all_accounts(
     db: Session,
     company_id: int,
-    type: Optional[str] = None,
+    type: str | None = None,
     current_user=None,
-) -> List[Account]:
+) -> list[Account]:
     """List all accounts for a company."""
     query = db.query(Account).filter(Account.company_id == company_id)
     if type:

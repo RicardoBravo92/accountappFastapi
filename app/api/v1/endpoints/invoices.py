@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import get_db
 from app.core.permissions import (
     INVOICE_PERMISSIONS,
     require_permission,
@@ -9,11 +9,11 @@ from app.core.permissions import (
 from app.models.auth.user import User
 from app.schemas.invoice import InvoiceCreate, InvoiceResponse, InvoiceUpdate
 from app.services.invoices import (
-    list_invoices,
     create_invoice,
-    get_invoice,
-    update_invoice,
     delete_invoice,
+    get_invoice,
+    list_invoices,
+    update_invoice,
 )
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])

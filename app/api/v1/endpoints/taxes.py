@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import get_db
 from app.core.permissions import (
     TAX_PERMISSIONS,
     require_permission,
@@ -9,11 +9,11 @@ from app.core.permissions import (
 from app.models.auth.user import User
 from app.schemas.tax import TaxCreate, TaxResponse, TaxUpdate
 from app.services.taxes import (
-    list_taxes,
     create_tax,
-    get_tax,
-    update_tax,
     delete_tax,
+    get_tax,
+    list_taxes,
+    update_tax,
 )
 
 router = APIRouter(prefix="/taxes", tags=["taxes"])

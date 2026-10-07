@@ -1,7 +1,14 @@
-from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    Response,
+    UploadFile,
+    status,
+)
 from fastapi.responses import FileResponse
 
-from app.api.dependencies import get_current_user
 from app.core.permissions import (
     UPLOAD_PERMISSIONS,
     require_permission,
@@ -13,11 +20,11 @@ from app.schemas.uploads import (
     UploadResponse,
 )
 from app.services.uploads import (
+    delete_upload,
+    download_file,
+    get_file_path,
     list_uploads,
     upload_file,
-    download_file,
-    delete_upload,
-    get_file_path,
 )
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])

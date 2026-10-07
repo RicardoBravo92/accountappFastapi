@@ -1,5 +1,5 @@
-from datetime import datetime, UTC
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 
 from sqlalchemy import (
     DateTime,
@@ -15,7 +15,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
-class InvoiceStatus(str, Enum):
+class InvoiceStatus(StrEnum):
     DRAFT = "draft"
     SENT = "sent"
     VIEWED = "viewed"

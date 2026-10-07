@@ -1,5 +1,5 @@
-from datetime import datetime, UTC
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Optional
 
 from sqlalchemy import (
@@ -15,7 +15,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
-class AccountType(str, Enum):
+class AccountType(StrEnum):
     ASSET = "asset"
     LIABILITY = "liability"
     EQUITY = "equity"

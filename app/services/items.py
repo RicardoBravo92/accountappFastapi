@@ -1,4 +1,4 @@
-from typing import List, Optional
+
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundError
@@ -10,8 +10,8 @@ def list_items(
     db: Session,
     company_id: int,
     current_user=None,
-    category_id: Optional[int] = None,
-) -> List[Item]:
+    category_id: int | None = None,
+) -> list[Item]:
     """List items for a company."""
     query = db.query(Item).filter(Item.company_id == company_id)
     if category_id:

@@ -1,9 +1,8 @@
-from datetime import datetime
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import get_db
 from app.core.permissions import (
     REPORT_PERMISSIONS,
     require_permission,
@@ -18,8 +17,8 @@ from app.schemas.reports import (
     TaxSummaryResponse,
 )
 from app.services.reports import (
-    profit_loss_report,
     income_expense_report,
+    profit_loss_report,
     tax_summary_report,
 )
 

@@ -1,5 +1,5 @@
-from datetime import datetime, UTC
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -7,14 +7,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     ADMIN = "admin"
     MANAGER = "manager"
     ACCOUNTANT = "accountant"
     VIEWER = "viewer"
 
 
-class AuditAction(str, Enum):
+class AuditAction(StrEnum):
     """Types of auditable actions."""
     # Authentication
     LOGIN_SUCCESS = "login_success"
@@ -24,7 +24,7 @@ class AuditAction(str, Enum):
     TOKEN_REFRESH = "token_refresh"
     TOKEN_REFRESH_FAILED = "token_refresh_failed"
     PASSWORD_CHANGE = "password_change"
-    
+
     # User management
     USER_CREATE = "user_create"
     USER_UPDATE = "user_update"
@@ -32,12 +32,12 @@ class AuditAction(str, Enum):
     USER_ROLE_CHANGE = "user_role_change"
     USER_ACTIVATE = "user_activate"
     USER_DEACTIVATE = "user_deactivate"
-    
+
     # Company
     COMPANY_CREATE = "company_create"
     COMPANY_UPDATE = "company_update"
     COMPANY_DELETE = "company_delete"
-    
+
     # Financial
     INVOICE_CREATE = "invoice_create"
     INVOICE_UPDATE = "invoice_update"
@@ -47,11 +47,11 @@ class AuditAction(str, Enum):
     BILL_DELETE = "bill_delete"
     PAYMENT_RECEIVED = "payment_received"
     PAYMENT_SENT = "payment_sent"
-    
+
     # Settings
     SETTINGS_CHANGE = "settings_change"
     PERMISSION_CHANGE = "permission_change"
-    
+
     # Data export/import
     DATA_EXPORT = "data_export"
     DATA_IMPORT = "data_import"
@@ -130,23 +130,23 @@ class AuditLog(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
     company_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("companies.id", ondelete="SET NULL"), nullable=True, index=True)
-    
+
     action: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     resource_type: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
     resource_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
-    
+
     # Request details
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
     request_method: Mapped[str | None] = mapped_column(String(10), nullable=True)
     request_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    
+
     # Response details
     status_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    
+
     # Additional context (JSON)
     details: Mapped[str | None] = mapped_column(Text, nullable=True)
-    
+
     # Metadata
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC), index=True)
 

@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import get_db
 from app.core.permissions import (
     BILL_PERMISSIONS,
     require_permission,
@@ -9,11 +9,11 @@ from app.core.permissions import (
 from app.models.auth.user import User
 from app.schemas.bill import BillCreate, BillResponse, BillUpdate
 from app.services.bills import (
-    get_all_bills,
     create_bill,
+    delete_bill,
+    get_all_bills,
     get_bill,
     update_bill,
-    delete_bill,
 )
 
 router = APIRouter(prefix="/bills", tags=["bills"])

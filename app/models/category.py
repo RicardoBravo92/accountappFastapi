@@ -1,5 +1,5 @@
-from datetime import datetime, UTC
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String
@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
-class CategoryType(str, Enum):
+class CategoryType(StrEnum):
     INCOME = "income"
     EXPENSE = "expense"
     BANKING = "banking"

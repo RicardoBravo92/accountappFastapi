@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import get_db
 from app.core.permissions import (
     ACCOUNT_PERMISSIONS,
     require_permission,
@@ -9,11 +9,11 @@ from app.core.permissions import (
 from app.models.auth.user import User
 from app.schemas.account import AccountCreate, AccountResponse, AccountUpdate
 from app.services.accounts import (
-    get_all_accounts,
     create_account,
-    get_account,
-    update_account,
     delete_account,
+    get_account,
+    get_all_accounts,
+    update_account,
 )
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])

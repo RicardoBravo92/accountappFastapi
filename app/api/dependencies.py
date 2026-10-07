@@ -5,7 +5,7 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.core.auth import decode_token
-from app.database import SessionLocal, get_db
+from app.database import get_db
 from app.models.auth.user import User
 
 security = HTTPBearer(auto_error=False)
@@ -37,13 +37,13 @@ class UserInactiveError(AuthenticationError):
 
 def validate_token(token: str) -> dict:
     """Validate JWT token and return payload.
-    
+
     Args:
         token: JWT token string
-        
+
     Returns:
         dict: Token payload
-        
+
     Raises:
         TokenError: If token is invalid or expired
     """
@@ -64,14 +64,14 @@ def get_authenticated_user(
     db: Session = Depends(get_db),
 ) -> User:
     """Get authenticated user from token.
-    
+
     Args:
         credentials: HTTP authorization credentials
         db: Database session
-        
+
     Returns:
         User: Authenticated user object
-        
+
     Raises:
         HTTPException: For authentication failures
     """
@@ -123,13 +123,13 @@ def get_current_user(
     db: Session = Depends(get_db),
 ) -> User:
     """Get current user for API endpoints.
-    
+
     This is the main dependency function used by API endpoints.
-    
+
     Args:
         credentials: HTTP authorization credentials
         db: Database session
-        
+
     Returns:
         User: Current authenticated user
     """

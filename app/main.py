@@ -7,20 +7,18 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.config import settings, get_logger
+from app.config import get_logger, settings
 from app.core.error_responses import create_problem_response
 from app.core.exceptions import (
-    DomainException,
-    NotFoundError,
-    ConflictError,
-    ValidationError,
-    UnauthorizedError,
-    ForbiddenError,
     BusinessRuleError,
+    ConflictError,
+    DomainException,
+    ForbiddenError,
+    NotFoundError,
+    UnauthorizedError,
+    ValidationError,
 )
 from app.database import Base, engine
-from app.models.auth.user import RefreshToken  # Ensure audit log table is created
-from app.models.auth.user import AuditLog  # Ensure audit log table is created
 from app.services.rate_limit import rate_limit
 from app.services.rate_limit_redis import rate_limit_manager
 
@@ -32,21 +30,21 @@ async def lifespan(app: FastAPI):
     """Application lifespan context manager."""
     try:
         Base.metadata.create_all(bind=engine)
-        
+
         # Ensure upload directory exists
         os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-        
+
         # Initialize Redis rate limiter
         if settings.ENVIRONMENT != "test":
             await rate_limit_manager.initialize()
-        
+
     except SQLAlchemyError as e:
         logger.error(f"Database initialization failed: {str(e)}")
     except Exception as e:
         logger.warning(f"Redis initialization failed, using in-memory fallback: {str(e)}")
-        
+
     yield
-    
+
     # Cleanup
     try:
         await rate_limit_manager.close()
@@ -94,7 +92,7 @@ def create_app() -> FastAPI:
     @app.middleware("http")
     async def validate_origin_middleware(request: Request, call_next):
         """Validate Origin header for requests with credentials.
-        
+
         This prevents CSRF by ensuring the Origin header matches
         one of the allowed CORS origins when credentials are included.
         """
@@ -138,7 +136,7 @@ def create_app() -> FastAPI:
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        
+
         # Different CSP for API vs docs
         if request.url.path.startswith("/docs") or request.url.path.startswith("/redoc") or request.url.path.startswith("/openapi.json"):
             # Permissive CSP for Swagger UI

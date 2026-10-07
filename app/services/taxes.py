@@ -1,4 +1,3 @@
-from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundError
@@ -10,7 +9,7 @@ def list_taxes(
     db: Session,
     company_id: int,
     current_user=None,
-) -> List[Tax]:
+) -> list[Tax]:
     """List taxes for a company."""
     return db.query(Tax).filter(Tax.company_id == company_id).all()
 

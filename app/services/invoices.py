@@ -1,7 +1,10 @@
 
+from fastapi import HTTPException
+
 from app.models import Invoice
 from app.models.invoice import InvoiceStatus
-from fastapi import HTTPException
+
+
 async def list_invoices(db, company_id, current_user):
     return db.query(Invoice).filter(Invoice.company_id == company_id).all()
 

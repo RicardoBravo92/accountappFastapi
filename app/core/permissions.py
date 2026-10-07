@@ -4,20 +4,18 @@ Defines permissions for each role and provides dependency functions
 for protecting API endpoints.
 """
 
-from enum import Enum
-from functools import wraps
-from typing import Callable, List, Set
+from enum import StrEnum
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import ForbiddenError
 from app.api.dependencies import get_current_user
+from app.core.exceptions import ForbiddenError
 from app.database import get_db
 from app.models.auth.user import User, UserRole
 
 
-class Permission(str, Enum):
+class Permission(StrEnum):
     """System permissions."""
     # Company permissions
     COMPANY_CREATE = "company:create"
@@ -25,63 +23,63 @@ class Permission(str, Enum):
     COMPANY_UPDATE = "company:update"
     COMPANY_DELETE = "company:delete"
     COMPANY_LIST = "company:list"
-    
+
     # User permissions
     USER_CREATE = "user:create"
     USER_READ = "user:read"
     USER_UPDATE = "user:update"
     USER_DELETE = "user:delete"
     USER_LIST = "user:list"
-    
+
     # Contact permissions
     CONTACT_CREATE = "contact:create"
     CONTACT_READ = "contact:read"
     CONTACT_UPDATE = "contact:update"
     CONTACT_DELETE = "contact:delete"
     CONTACT_LIST = "contact:list"
-    
+
     # Account permissions
     ACCOUNT_CREATE = "account:create"
     ACCOUNT_READ = "account:read"
     ACCOUNT_UPDATE = "account:update"
     ACCOUNT_DELETE = "account:delete"
     ACCOUNT_LIST = "account:list"
-    
+
     # Transaction permissions
     TRANSACTION_CREATE = "transaction:create"
     TRANSACTION_READ = "transaction:read"
     TRANSACTION_UPDATE = "transaction:update"
     TRANSACTION_DELETE = "transaction:delete"
     TRANSACTION_LIST = "transaction:list"
-    
+
     # Invoice permissions
     INVOICE_CREATE = "invoice:create"
     INVOICE_READ = "invoice:read"
     INVOICE_UPDATE = "invoice:update"
     INVOICE_DELETE = "invoice:delete"
     INVOICE_LIST = "invoice:list"
-    
+
     # Bill permissions
     BILL_CREATE = "bill:create"
     BILL_READ = "bill:read"
     BILL_UPDATE = "bill:update"
     BILL_DELETE = "bill:delete"
     BILL_LIST = "bill:list"
-    
+
     # Report permissions
     REPORT_READ = "report:read"
     REPORT_EXPORT = "report:export"
-    
+
     # Settings permissions
     SETTINGS_READ = "settings:read"
     SETTINGS_UPDATE = "settings:update"
-    
+
     # Upload permissions
     UPLOAD_CREATE = "upload:create"
     UPLOAD_READ = "upload:read"
     UPLOAD_DELETE = "upload:delete"
     UPLOAD_LIST = "upload:list"
-    
+
     # Webhook permissions
     WEBHOOK_CREATE = "webhook:create"
     WEBHOOK_READ = "webhook:read"
@@ -89,35 +87,35 @@ class Permission(str, Enum):
     WEBHOOK_DELETE = "webhook:delete"
     WEBHOOK_LIST = "webhook:list"
     WEBHOOK_TRIGGER = "webhook:trigger"
-    
+
     # Category permissions
     CATEGORY_CREATE = "category:create"
     CATEGORY_READ = "category:read"
     CATEGORY_UPDATE = "category:update"
     CATEGORY_DELETE = "category:delete"
     CATEGORY_LIST = "category:list"
-    
+
     # Tax permissions
     TAX_CREATE = "tax:create"
     TAX_READ = "tax:read"
     TAX_UPDATE = "tax:update"
     TAX_DELETE = "tax:delete"
     TAX_LIST = "tax:list"
-    
+
     # Currency permissions
     CURRENCY_CREATE = "currency:create"
     CURRENCY_READ = "currency:read"
     CURRENCY_UPDATE = "currency:update"
     CURRENCY_DELETE = "currency:delete"
     CURRENCY_LIST = "currency:list"
-    
+
     # Item permissions
     ITEM_CREATE = "item:create"
     ITEM_READ = "item:read"
     ITEM_UPDATE = "item:update"
     ITEM_DELETE = "item:delete"
     ITEM_LIST = "item:list"
-    
+
     # Transfer permissions
     TRANSFER_CREATE = "transfer:create"
     TRANSFER_READ = "transfer:read"
@@ -127,7 +125,7 @@ class Permission(str, Enum):
 
 
 # Role-to-permissions mapping
-ROLE_PERMISSIONS: dict[UserRole, Set[Permission]] = {
+ROLE_PERMISSIONS: dict[UserRole, set[Permission]] = {
     UserRole.ADMIN: {
         # Admin has all permissions
         Permission.COMPANY_CREATE, Permission.COMPANY_READ, Permission.COMPANY_UPDATE,
@@ -233,7 +231,7 @@ ROLE_PERMISSIONS: dict[UserRole, Set[Permission]] = {
 }
 
 
-def get_user_permissions(role: UserRole) -> Set[Permission]:
+def get_user_permissions(role: UserRole) -> set[Permission]:
     """Get all permissions for a role."""
     return ROLE_PERMISSIONS.get(role, set())
 
@@ -245,7 +243,7 @@ def has_permission(role: UserRole, permission: Permission) -> bool:
 
 def require_permission(permission: Permission):
     """FastAPI dependency that checks if current user has a specific permission.
-    
+
     Usage:
         @router.get("/companies")
         def list_companies(current_user: User = Depends(require_permission(Permission.COMPANY_LIST))):
@@ -278,7 +276,7 @@ def require_any_permission(*permissions: Permission):
 
 def require_role(*allowed_roles: UserRole):
     """FastAPI dependency that checks if current user has one of the allowed roles.
-    
+
     Usage:
         @router.delete("/users/{user_id}")
         def delete_user(current_user: User = Depends(require_role(UserRole.ADMIN))):
@@ -300,22 +298,19 @@ def require_owner_or_admin(
     current_user: User = Depends(get_current_user),
 ) -> User:
     """Check if user is owner of the company or admin.
-    
+
     This is useful for company-scoped resources where owners and admins
     have full access regardless of their role's base permissions.
     """
-    from app.api.dependencies import get_db
-    from sqlalchemy.orm import Session
-    from fastapi import Depends
-    
+
     # This will be implemented as a dependency that takes company_id
     # For now, we'll use a simpler approach
     user_role = UserRole(current_user.role)
-    
+
     # Admins can access everything
     if user_role == UserRole.ADMIN:
         return current_user
-    
+
     # Check if user is owner of the company
     # This requires a database query, so we'll create a specific dependency for this
     return current_user
@@ -323,10 +318,10 @@ def require_owner_or_admin(
 
 class RequireCompanyAccess:
     """Dependency class for company-scoped access control.
-    
+
     Usage:
         require_company_access = RequireCompanyAccess(Permission.COMPANY_READ)
-        
+
         @router.get("/companies/{company_id}")
         def get_company(
             company_id: int,
@@ -334,11 +329,11 @@ class RequireCompanyAccess:
         ):
             ...
     """
-    
+
     def __init__(self, permission: Permission, allow_owner: bool = True):
         self.permission = permission
         self.allow_owner = allow_owner
-    
+
     def __call__(
         self,
         company_id: int,
@@ -346,28 +341,28 @@ class RequireCompanyAccess:
         db: Session = Depends(get_db),
     ) -> User:
         from app.models.auth.user import UserCompany
-        
+
         user_role = UserRole(current_user.role)
-        
+
         # Admin always has access
         if user_role == UserRole.ADMIN:
             return current_user
-        
+
         # Check if user is owner of the company
         if self.allow_owner:
             is_owner = db.query(UserCompany).filter(
                 UserCompany.user_id == current_user.id,
                 UserCompany.company_id == company_id,
-                UserCompany.is_owner == True
+                UserCompany.is_owner
             ).first()
-            
+
             if is_owner:
                 return current_user
-        
+
         # Check role-based permission
         if has_permission(user_role, self.permission):
             return current_user
-        
+
         # If we get here, user doesn't have permission
         raise ForbiddenError(
             f"Access denied to company {company_id}. "

@@ -1,14 +1,14 @@
 import os
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.core.database import Base
 from app.api.dependencies import get_db
+from app.core.database import Base
 from app.main import app
 from app.services.rate_limit import api_rate_limiter, login_rate_limiter
-
 
 # Try to import testcontainers
 try:
@@ -51,12 +51,12 @@ def test_database():
         db_url = container.get_connection_url()
         if db_url.startswith("postgresql://"):
             db_url = db_url.replace("postgresql://", "postgresql+psycopg2://")
-        
+
         engine = create_engine(db_url)
         Base.metadata.create_all(bind=engine)
-        
+
         yield engine
-        
+
         engine.dispose()
         container.stop()
     else:

@@ -1,4 +1,3 @@
-from typing import Optional, List
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundError
@@ -46,6 +45,6 @@ def create_company(db: Session, company_data: CompanyCreate, current_user) -> Co
     return company
 
 
-def list_companies(db: Session, current_user) -> List[Company]:
+def list_companies(db: Session, current_user) -> list[Company]:
     """List all active companies."""
-    return db.query(Company).filter(Company.is_active == True).all()
+    return db.query(Company).filter(Company.is_active).all()

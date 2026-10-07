@@ -1,4 +1,4 @@
-from typing import List, Optional
+
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundError
@@ -9,9 +9,9 @@ from app.schemas.category import CategoryCreate, CategoryUpdate
 def list_categories(
     db: Session,
     company_id: int,
-    type: Optional[str] = None,
+    type: str | None = None,
     current_user=None,
-) -> List[Category]:
+) -> list[Category]:
     """List categories for a company."""
     query = db.query(Category).filter(Category.company_id == company_id)
     if type:

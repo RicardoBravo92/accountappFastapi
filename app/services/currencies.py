@@ -1,4 +1,3 @@
-from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundError
@@ -9,9 +8,9 @@ from app.schemas.currency import CurrencyCreate, CurrencyUpdate
 def list_currencies(
     db: Session,
     current_user=None,
-) -> List[Currency]:
+) -> list[Currency]:
     """List active currencies."""
-    return db.query(Currency).filter(Currency.is_active == True).all()
+    return db.query(Currency).filter(Currency.is_active).all()
 
 
 def create_currency(

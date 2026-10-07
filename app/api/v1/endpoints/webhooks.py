@@ -1,21 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import get_db
 from app.core.permissions import (
     WEBHOOK_PERMISSIONS,
     require_permission,
 )
 from app.models.auth.user import User
 from app.schemas.webhook import (
-    WebhookEndpointCreate,
-    WebhookEndpointUpdate,
-    WebhookEndpointResponse,
     WebhookDeliveryResponse,
+    WebhookEndpointCreate,
+    WebhookEndpointResponse,
     WebhookEndpointStats,
-    WebhookEvent,
+    WebhookEndpointUpdate,
 )
-from app.services.webhooks import WebhookManager, trigger_webhook
+from app.services.webhooks import WebhookManager
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
@@ -44,7 +43,7 @@ def create_webhook(
     company_id = current_user.companies[0].id if current_user.companies else 0
     if not company_id:
         raise HTTPException(status_code=400, detail="User must belong to a company")
-    
+
     manager = WebhookManager(db)
     endpoint = manager.create_endpoint(
         company_id=company_id,
@@ -54,9 +53,9 @@ def create_webhook(
         max_retries=webhook_data.max_retries,
         retry_delay_seconds=webhook_data.retry_delay_seconds,
     )
-    
+
     # Audit log
-    from app.services.audit import AuditLogger, AuditAction
+    from app.services.audit import AuditLogger
     audit = AuditLogger(db)
     audit.log(
         action=WebhookAction.WEBHOOK_CREATE,
@@ -68,7 +67,7 @@ def create_webhook(
         status_code=201,
         details={"url": str(webhook_data.url), "events": webhook_data.events},
     )
-    
+
     return endpoint
 
 
@@ -83,7 +82,7 @@ def get_webhook(
     company_id = current_user.companies[0].id if current_user.companies else 0
     if not company_id:
         raise HTTPException(status_code=400, detail="User must belong to a company")
-    
+
     manager = WebhookManager(db)
     endpoint = manager.get_endpoint(webhook_id, company_id)
     if not endpoint:
@@ -103,7 +102,7 @@ def update_webhook(
     company_id = current_user.companies[0].id if current_user.companies else 0
     if not company_id:
         raise HTTPException(status_code=400, detail="User must belong to a company")
-    
+
     manager = WebhookManager(db)
     endpoint = manager.update_endpoint(
         endpoint_id=webhook_id,
@@ -117,9 +116,9 @@ def update_webhook(
     )
     if not endpoint:
         raise HTTPException(status_code=404, detail="Webhook endpoint not found")
-    
+
     # Audit log
-    from app.services.audit import AuditLogger, AuditAction
+    from app.services.audit import AuditAction, AuditLogger
     audit = AuditLogger(db)
     audit.log(
         action=AuditAction.WEBHOOK_UPDATE,
@@ -131,7 +130,7 @@ def update_webhook(
         status_code=200,
         details=webhook_data.model_dump(exclude_unset=True),
     )
-    
+
     return endpoint
 
 
@@ -146,14 +145,14 @@ def delete_webhook(
     company_id = current_user.companies[0].id if current_user.companies else 0
     if not company_id:
         raise HTTPException(status_code=400, detail="User must belong to a company")
-    
+
     manager = WebhookManager(db)
     success = manager.delete_endpoint(webhook_id, company_id)
     if not success:
         raise HTTPException(status_code=404, detail="Webhook endpoint not found")
-    
+
     # Audit log
-    from app.services.audit import AuditLogger, AuditAction
+    from app.services.audit import AuditAction, AuditLogger
     audit = AuditLogger(db)
     audit.log(
         action=AuditAction.WEBHOOK_DELETE,
@@ -164,7 +163,7 @@ def delete_webhook(
         request=request,
         status_code=204,
     )
-    
+
     return None
 
 
@@ -181,12 +180,12 @@ def list_webhook_deliveries(
     company_id = current_user.companies[0].id if current_user.companies else 0
     if not company_id:
         raise HTTPException(status_code=400, detail="User must belong to a company")
-    
+
     manager = WebhookManager(db)
     endpoint = manager.get_endpoint(webhook_id, company_id)
     if not endpoint:
         raise HTTPException(status_code=404, detail="Webhook endpoint not found")
-    
+
     deliveries = manager.get_delivery_logs(
         endpoint_id=webhook_id,
         success=success,
@@ -206,10 +205,10 @@ def get_webhook_stats(
     company_id = current_user.companies[0].id if current_user.companies else 0
     if not company_id:
         raise HTTPException(status_code=400, detail="User must belong to a company")
-    
+
     manager = WebhookManager(db)
     endpoint = manager.get_endpoint(webhook_id, company_id)
     if not endpoint:
         raise HTTPException(status_code=404, detail="Webhook endpoint not found")
-    
+
     return stats

@@ -1,4 +1,4 @@
-from typing import List, Optional
+
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundError
@@ -9,9 +9,9 @@ from app.schemas.contact import ContactCreate, ContactUpdate
 def list_contacts(
     db: Session,
     company_id: int,
-    type: Optional[str] = None,
+    type: str | None = None,
     current_user=None,
-) -> List[Contact]:
+) -> list[Contact]:
     """List contacts for a company."""
     query = db.query(Contact).filter(Contact.company_id == company_id)
     if type:

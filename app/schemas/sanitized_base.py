@@ -1,11 +1,10 @@
 """Base sanitized models with automatic XSS prevention."""
 
-from typing import Any
-from pydantic import BaseModel, field_validator, BeforeValidator
-from typing_extensions import Annotated
+from typing import Annotated, Any
 
-from app.core.sanitization import sanitize_string, sanitize_html
+from pydantic import BaseModel, BeforeValidator, field_validator
 
+from app.core.sanitization import sanitize_html, sanitize_string
 
 # Annotated types for common sanitized fields
 SanitizedStr = Annotated[str, BeforeValidator(sanitize_string)]

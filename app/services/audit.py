@@ -1,17 +1,9 @@
 """Audit logging for sensitive actions."""
 
 import json
-from datetime import datetime, UTC
-from enum import Enum
-from typing import Any, Optional
 from functools import wraps
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from app.database import Base
-from app.core.config import settings
-from app.models.auth.user import AuditLog, AuditAction
+from app.models.auth.user import AuditAction, AuditLog
 
 
 def get_client_ip(request) -> str | None:
@@ -34,28 +26,28 @@ def log_audit(
     details: dict | None = None,
 ) -> AuditLog:
     """Create an audit log entry."""
-    
+
     # Prepare details
     details_json = None
     if details:
         # Remove sensitive fields
-        safe_details = {k: v for k, v in details.items() 
+        safe_details = {k: v for k, v in details.items()
                        if k.lower() not in ("password", "token", "secret", "key", "refresh_token")}
         if safe_details:
             details_json = json.dumps(safe_details)
-    
+
     # Extract request info
     ip_address = None
     user_agent = None
     request_method = None
     request_path = None
-    
+
     if request:
         ip_address = get_client_ip(request)
         user_agent = request.headers.get("user-agent")
         request_method = request.method
         request_path = str(request.url.path)
-    
+
     audit_log = AuditLog(
         user_id=user_id,
         company_id=company_id,
@@ -69,11 +61,11 @@ def log_audit(
         status_code=status_code,
         details=details_json,
     )
-    
+
     db.add(audit_log)
     db.commit()
     db.refresh(audit_log)
-    
+
     return audit_log
 
 
@@ -84,7 +76,7 @@ def audit_action(
     company_id_param: str | None = None,
 ):
     """Decorator to automatically audit an endpoint action.
-    
+
     Usage:
         @audit_action(AuditAction.INVOICE_CREATE, "invoice", "invoice_id")
         def create_invoice(invoice_id: int, ...):
@@ -97,24 +89,24 @@ def audit_action(
             db = kwargs.get("db")
             current_user = kwargs.get("current_user")
             request = kwargs.get("request")
-            
+
             # Extract resource ID from kwargs or result
             resource_id = kwargs.get(resource_id_param) if resource_id_param else None
             company_id = kwargs.get(company_id_param) if company_id_param else None
-            
+
             # Execute the function
             try:
                 result = await func(*args, **kwargs)
-                
+
                 # Extract resource ID from result if not in kwargs
                 if not resource_id and result:
                     if hasattr(result, "id"):
                         resource_id = result.id
-                
+
                 # Extract company ID from result if not in kwargs
                 if not company_id and result and hasattr(result, "company_id"):
                     company_id = result.company_id
-                
+
                 # Log success
                 if db:
                     log_audit(
@@ -128,9 +120,9 @@ def audit_action(
                         status_code=200,
                         details={"result": "success"},
                     )
-                
+
                 return result
-                
+
             except Exception as e:
                 # Log failure
                 if db:
@@ -146,17 +138,17 @@ def audit_action(
                         details={"error": str(e)},
                     )
                 raise
-        
+
         return wrapper
     return decorator
 
 
 class AuditLogger:
     """High-level audit logger for use in services."""
-    
+
     def __init__(self, db):
         self.db = db
-    
+
     def log(
         self,
         action: AuditAction,
@@ -179,41 +171,41 @@ class AuditLogger:
             status_code=status_code,
             details=details,
         )
-    
+
     def login_success(self, user_id: int, request=None):
         return self.log(AuditAction.LOGIN_SUCCESS, user_id=user_id, request=request, status_code=200)
-    
+
     def login_failed(self, email: str, request=None, reason: str = "invalid_credentials"):
         return self.log(
-            AuditAction.LOGIN_FAILED, 
-            request=request, 
+            AuditAction.LOGIN_FAILED,
+            request=request,
             status_code=401,
             details={"email": email, "reason": reason}
         )
-    
+
     def logout(self, user_id: int, request=None):
         return self.log(AuditAction.LOGOUT, user_id=user_id, request=request, status_code=200)
-    
+
     def logout_all(self, user_id: int, request=None):
         return self.log(AuditAction.LOGOUT_ALL, user_id=user_id, request=request, status_code=200)
-    
+
     def token_refresh(self, user_id: int, request=None):
         return self.log(AuditAction.TOKEN_REFRESH, user_id=user_id, request=request, status_code=200)
-    
+
     def password_change(self, user_id: int, request=None):
         return self.log(AuditAction.PASSWORD_CHANGE, user_id=user_id, request=request, status_code=200)
-    
+
     def user_create(self, user_id: int, actor_id: int | None = None, request=None):
         return self.log(
-            AuditAction.USER_CREATE, 
-            user_id=actor_id, 
-            resource_type="user", 
+            AuditAction.USER_CREATE,
+            user_id=actor_id,
+            resource_type="user",
             resource_id=user_id,
             request=request,
             status_code=201,
             details={"created_user_id": user_id}
         )
-    
+
     def user_update(self, user_id: int, actor_id: int | None = None, changes: dict | None = None, request=None):
         return self.log(
             AuditAction.USER_UPDATE,
@@ -224,7 +216,7 @@ class AuditLogger:
             status_code=200,
             details={"changes": changes} if changes else None
         )
-    
+
     def invoice_create(self, invoice_id: int, user_id: int, company_id: int, request=None):
         return self.log(
             AuditAction.INVOICE_CREATE,
@@ -235,7 +227,7 @@ class AuditLogger:
             request=request,
             status_code=201,
         )
-    
+
     def payment_received(self, payment_id: int, user_id: int, company_id: int, amount: float, request=None):
         return self.log(
             AuditAction.PAYMENT_RECEIVED,

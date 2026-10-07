@@ -1,5 +1,7 @@
 from fastapi import HTTPException
+
 from app.models.transaction import Transaction
+
 
 async def list_transactions(db, company_id, account_id=None, type=None, current_user=None):
     query = db.query(Transaction).filter(Transaction.company_id == company_id)
@@ -48,4 +50,3 @@ transaction_service = {
     "update_transaction": update_transaction,
     "delete_transaction": delete_transaction,
 }
-    

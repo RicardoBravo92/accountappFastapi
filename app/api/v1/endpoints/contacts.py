@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import get_db
 from app.core.permissions import (
     CONTACT_PERMISSIONS,
     require_permission,
@@ -9,11 +9,11 @@ from app.core.permissions import (
 from app.models.auth.user import User
 from app.schemas.contact import ContactCreate, ContactResponse, ContactUpdate
 from app.services.contacts import (
-    list_contacts,
     create_contact,
-    get_contact,
-    update_contact,
     delete_contact,
+    get_contact,
+    list_contacts,
+    update_contact,
 )
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])

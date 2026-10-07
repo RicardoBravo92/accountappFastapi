@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import get_db
 from app.core.permissions import (
     CURRENCY_PERMISSIONS,
     require_permission,
@@ -9,11 +9,11 @@ from app.core.permissions import (
 from app.models.auth.user import User
 from app.schemas.currency import CurrencyCreate, CurrencyResponse, CurrencyUpdate
 from app.services.currencies import (
-    list_currencies,
     create_currency,
-    get_currency,
-    update_currency,
     delete_currency,
+    get_currency,
+    list_currencies,
+    update_currency,
 )
 
 router = APIRouter(prefix="/currencies", tags=["currencies"])

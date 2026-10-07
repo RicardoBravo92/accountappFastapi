@@ -1,4 +1,3 @@
-from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundError
@@ -10,7 +9,7 @@ def list_transfers(
     db: Session,
     company_id: int,
     current_user=None,
-) -> List[Transfer]:
+) -> list[Transfer]:
     """List transfers for a company."""
     return db.query(Transfer).filter(Transfer.company_id == company_id).order_by(Transfer.transferred_at.desc()).all()
 

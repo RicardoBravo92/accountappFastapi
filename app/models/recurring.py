@@ -1,5 +1,5 @@
-from datetime import datetime, UTC
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 
 from sqlalchemy import (
     Boolean,
@@ -14,7 +14,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.database import Base
 
 
-class RecurringFrequency(str, Enum):
+class RecurringFrequency(StrEnum):
     DAILY = "daily"
     WEEKLY = "weekly"
     MONTHLY = "monthly"

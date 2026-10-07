@@ -1,20 +1,20 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_db
 from app.core.auth import create_access_token, decode_token
 from app.models.auth.user import User
-from app.schemas.auth import Token, UserCreate, UserResponse, RefreshTokenResponse
+from app.schemas.auth import RefreshTokenResponse, UserCreate, UserResponse
+from app.services.audit import AuditAction, AuditLogger
 from app.services.auth.user_service import (
-    create_user,
     authenticate_user,
     create_refresh_token,
-    verify_and_rotate_refresh_token,
-    revoke_refresh_token,
+    create_user,
     revoke_all_user_tokens,
+    revoke_refresh_token,
+    verify_and_rotate_refresh_token,
 )
-from app.services.audit import AuditLogger, AuditAction
 from app.services.rate_limit import check_login_rate_limit
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -55,7 +55,7 @@ def login(
 ):
     # Check login rate limit before authentication
     check_login_rate_limit(request, username)
-    
+
     audit = AuditLogger(db)
     user = authenticate_user(db, username, password)
     if not user:
@@ -64,9 +64,9 @@ def login(
 
     access_token = create_access_token(data={"user_id": user.id})
     refresh_token = create_refresh_token(db, user.id)
-    
+
     audit.login_success(user.id, request=request)
-    
+
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -112,13 +112,13 @@ def refresh_token(refresh_token: str = Form(..., description="Refresh token"), d
             details={"reason": "invalid_or_expired"},
         )
         raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
-    
+
     # Audit successful token refresh
     payload = decode_token(refresh_token)
     user_id = payload.get("user_id") if payload else None
     audit = AuditLogger(db)
     audit.token_refresh(user_id, request=request)
-    
+
     return result
 
 
@@ -131,14 +131,13 @@ def refresh_token(refresh_token: str = Form(..., description="Refresh token"), d
 def logout(request: Request, refresh_token: str = Form(..., description="Refresh token to revoke"), db: Session = Depends(get_db)):
     """Revoke refresh token on logout."""
     revoke_refresh_token(db, refresh_token)
-    
+
     # Audit logout
-    from app.core.auth import decode_token
     payload = decode_token(refresh_token)
     user_id = payload.get("user_id") if payload else None
     audit = AuditLogger(db)
     audit.logout(user_id, request=request)
-    
+
     return None
 
 
@@ -151,9 +150,9 @@ def logout(request: Request, refresh_token: str = Form(..., description="Refresh
 def logout_all(request: Request, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Revoke all refresh tokens for the current user."""
     revoke_all_user_tokens(db, current_user.id)
-    
+
     # Audit logout all
     audit = AuditLogger(db)
     audit.logout_all(current_user.id, request=request)
-    
+
     return None

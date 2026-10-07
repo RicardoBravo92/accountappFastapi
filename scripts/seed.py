@@ -11,8 +11,6 @@ Usage:
     uv run python scripts/seed.py --fresh      # Delete all and reseed
 """
 
-import sys
-import os
 import argparse
 
 
@@ -20,16 +18,16 @@ def seed_database(fresh=False):
     """Seed the database with initial data."""
     # Import models FIRST to register them with Base
     from app.core.auth import hash_password
-    from app.models.auth.user import User, UserRole
-    from app.models.company import Company
-    from app.models.account import Account, AccountType
-    from app.models.category import Category, CategoryType
-    from app.models.currency import Currency
-    from app.models.contact import Contact
 
     # Import database configuration AFTER models are imported
-    from app.core.database import Base, engine, SessionLocal
-    
+    from app.core.database import Base, SessionLocal, engine
+    from app.models.account import Account, AccountType
+    from app.models.auth.user import User, UserRole
+    from app.models.category import Category, CategoryType
+    from app.models.company import Company
+    from app.models.contact import Contact
+    from app.models.currency import Currency
+
     # Create tables (models now registered with Base)
     Base.metadata.create_all(bind=engine)
 
@@ -165,7 +163,7 @@ def seed_database(fresh=False):
         db.commit()
         print("Seeded database successfully!")
         print(f"  Company: {company.name} (ID: {company.id})")
-        print(f"  Admin User: admin@demo.com / admin123")
+        print("  Admin User: admin@demo.com / admin123")
         print(f"  Accounts: {db.query(Account).count()}")
         print(f"  Categories: {db.query(Category).count()}")
         print(f"  Currencies: {db.query(Currency).count()}")
