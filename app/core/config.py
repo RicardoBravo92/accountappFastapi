@@ -54,16 +54,29 @@ class Settings(BaseSettings):
         return self.ENVIRONMENT.lower() == "development"
 
     def get_database_connection_kwargs(self) -> dict:
-        """Get database connection parameters with proper encoding."""
+        """Get database connection parameters with proper encoding.
+        
+        Note: PostgreSQL-specific parameters like sslmode, channel_binding, options, 
+        application_name, etc. should remain in the URL query string and NOT be 
+        passed as keyword arguments to create_engine().
+        """
         from sqlalchemy.engine.url import make_url
 
         url = make_url(self.DATABASE_URL)
-        kwargs = dict(url.query)
+        # Only keep parameters that create_engine() accepts as keyword arguments
+        # Filter out PostgreSQL-specific parameters that should stay in URL query string
+        pg_specific_params = {
+            "sslmode", "channel_binding", "options", "application_name",
+            "target_session_attrs", "gsslib", "krbsrvname", "gssdelegation",
+            "sslcert", "sslkey", "sslrootcert", "sslcrl", "sslcompression",
+            "sslsni", "requirepeer", "ssl_min_protocol_version", "ssl_max_protocol_version",
+        }
+        kwargs = {k: v for k, v in url.query.items() if k not in pg_specific_params}
 
         # Add proper encoding parameters for PostgreSQL
         if self.DATABASE_URL.startswith("postgresql"):
             kwargs.setdefault("client_encoding", "utf-8")
-            kwargs.setdefault("options", "-c statement_timeout=30000")
+            # Note: 'options' parameter is PostgreSQL-specific and should stay in URL
 
         # Add connection pool settings
         kwargs.setdefault("pool_size", 10)
