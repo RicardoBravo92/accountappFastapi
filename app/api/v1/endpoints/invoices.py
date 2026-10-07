@@ -19,42 +19,46 @@ from app.services.invoices import (
 router = APIRouter(prefix="/invoices", tags=["invoices"])
 
 @router.get("/", response_model=list[InvoiceResponse])
-def list_invoices_endpoint(
+async def list_invoices_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(INVOICE_PERMISSIONS["list"])),
 ):
-    return list_invoices(db, current_user)
+    return await list_invoices(db, current_user)
+
 
 @router.post("/", response_model=InvoiceResponse, status_code=status.HTTP_201_CREATED)
-def create_invoice_endpoint(
+async def create_invoice_endpoint(
     invoice_data: InvoiceCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(INVOICE_PERMISSIONS["create"])),
 ):
-    return create_invoice(db, invoice_data, current_user)
+    return await create_invoice(db, invoice_data, current_user)
+
 
 @router.get("/{invoice_id}", response_model=InvoiceResponse)
-def get_invoice_endpoint(
+async def get_invoice_endpoint(
     invoice_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(INVOICE_PERMISSIONS["read"])),
 ):
-    return get_invoice(db, invoice_id, current_user)
+    return await get_invoice(db, invoice_id, current_user)
+
 
 @router.put("/{invoice_id}", response_model=InvoiceResponse)
-def update_invoice_endpoint(
+async def update_invoice_endpoint(
     invoice_id: int,
     invoice_data: InvoiceUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(INVOICE_PERMISSIONS["update"])),
 ):
-    return update_invoice(db, invoice_id, invoice_data, current_user)
+    return await update_invoice(db, invoice_id, invoice_data, current_user)
+
 
 @router.delete("/{invoice_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_invoice_endpoint(
+async def delete_invoice_endpoint(
     invoice_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(INVOICE_PERMISSIONS["delete"])),
 ):
-    delete_invoice(db, invoice_id, current_user)
+    await delete_invoice(db, invoice_id, current_user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -19,42 +19,46 @@ from app.services.currencies import (
 router = APIRouter(prefix="/currencies", tags=["currencies"])
 
 @router.get("/", response_model=list[CurrencyResponse])
-def list_currencies_endpoint(
+async def list_currencies_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(CURRENCY_PERMISSIONS["list"])),
 ):
-    return list_currencies(db, current_user)
+    return await list_currencies(db, current_user)
+
 
 @router.post("/", response_model=CurrencyResponse, status_code=status.HTTP_201_CREATED)
-def create_currency_endpoint(
+async def create_currency_endpoint(
     currency_data: CurrencyCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(CURRENCY_PERMISSIONS["create"])),
 ):
-    return create_currency(db, currency_data, current_user)
+    return await create_currency(db, currency_data, current_user)
+
 
 @router.get("/{currency_id}", response_model=CurrencyResponse)
-def get_currency_endpoint(
+async def get_currency_endpoint(
     currency_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(CURRENCY_PERMISSIONS["read"])),
 ):
-    return get_currency(db, currency_id, current_user)
+    return await get_currency(db, currency_id, current_user)
+
 
 @router.put("/{currency_id}", response_model=CurrencyResponse)
-def update_currency_endpoint(
+async def update_currency_endpoint(
     currency_id: int,
     currency_data: CurrencyUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(CURRENCY_PERMISSIONS["update"])),
 ):
-    return update_currency(db, currency_id, currency_data, current_user)
+    return await update_currency(db, currency_id, currency_data, current_user)
+
 
 @router.delete("/{currency_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_currency_endpoint(
+async def delete_currency_endpoint(
     currency_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(CURRENCY_PERMISSIONS["delete"])),
 ):
-    delete_currency(db, currency_id, current_user)
+    await delete_currency(db, currency_id, current_user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

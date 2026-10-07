@@ -19,43 +19,47 @@ from app.services.transfers import (
 router = APIRouter(prefix="/transfers", tags=["transfers"])
 
 @router.get("/", response_model=list[TransferResponse])
-def list_transfers_endpoint(
+async def list_transfers_endpoint(
     company_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(TRANSFER_PERMISSIONS["list"])),
 ):
-    return list_transfers(db, company_id, current_user)
+    return await list_transfers(db, company_id, current_user)
+
 
 @router.post("/", response_model=TransferResponse, status_code=status.HTTP_201_CREATED)
-def create_transfer_endpoint(
+async def create_transfer_endpoint(
     transfer_data: TransferCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(TRANSFER_PERMISSIONS["create"])),
 ):
-    return create_transfer(db, transfer_data, current_user)
+    return await create_transfer(db, transfer_data, current_user)
+
 
 @router.get("/{transfer_id}", response_model=TransferResponse)
-def get_transfer_endpoint(
+async def get_transfer_endpoint(
     transfer_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(TRANSFER_PERMISSIONS["read"])),
 ):
-    return get_transfer(db, transfer_id, current_user)
+    return await get_transfer(db, transfer_id, current_user)
+
 
 @router.put("/{transfer_id}", response_model=TransferResponse)
-def update_transfer_endpoint(
+async def update_transfer_endpoint(
     transfer_id: int,
     transfer_data: TransferUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(TRANSFER_PERMISSIONS["update"])),
 ):
-    return update_transfer(db, transfer_id, transfer_data, current_user)
+    return await update_transfer(db, transfer_id, transfer_data, current_user)
+
 
 @router.delete("/{transfer_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_transfer_endpoint(
+async def delete_transfer_endpoint(
     transfer_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(TRANSFER_PERMISSIONS["delete"])),
 ):
-    delete_transfer(db, transfer_id, current_user)
+    await delete_transfer(db, transfer_id, current_user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

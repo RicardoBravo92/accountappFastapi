@@ -19,42 +19,46 @@ from app.services.taxes import (
 router = APIRouter(prefix="/taxes", tags=["taxes"])
 
 @router.get("/", response_model=list[TaxResponse])
-def list_taxes_endpoint(
+async def list_taxes_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(TAX_PERMISSIONS["list"])),
 ):
-    return list_taxes(db, current_user)
+    return await list_taxes(db, current_user)
+
 
 @router.post("/", response_model=TaxResponse, status_code=status.HTTP_201_CREATED)
-def create_tax_endpoint(
+async def create_tax_endpoint(
     tax_data: TaxCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(TAX_PERMISSIONS["create"])),
 ):
-    return create_tax(db, tax_data, current_user)
+    return await create_tax(db, tax_data, current_user)
+
 
 @router.get("/{tax_id}", response_model=TaxResponse)
-def get_tax_endpoint(
+async def get_tax_endpoint(
     tax_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(TAX_PERMISSIONS["read"])),
 ):
-    return get_tax(db, tax_id, current_user)
+    return await get_tax(db, tax_id, current_user)
+
 
 @router.put("/{tax_id}", response_model=TaxResponse)
-def update_tax_endpoint(
+async def update_tax_endpoint(
     tax_id: int,
     tax_data: TaxUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(TAX_PERMISSIONS["update"])),
 ):
-    return update_tax(db, tax_id, tax_data, current_user)
+    return await update_tax(db, tax_id, tax_data, current_user)
+
 
 @router.delete("/{tax_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_tax_endpoint(
+async def delete_tax_endpoint(
     tax_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(TAX_PERMISSIONS["delete"])),
 ):
-    delete_tax(db, tax_id, current_user)
+    await delete_tax(db, tax_id, current_user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

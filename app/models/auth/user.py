@@ -24,7 +24,7 @@ class AuditAction(StrEnum):
     TOKEN_REFRESH = "token_refresh"
     TOKEN_REFRESH_FAILED = "token_refresh_failed"
     PASSWORD_CHANGE = "password_change"
-
+    
     # User management
     USER_CREATE = "user_create"
     USER_UPDATE = "user_update"
@@ -32,12 +32,12 @@ class AuditAction(StrEnum):
     USER_ROLE_CHANGE = "user_role_change"
     USER_ACTIVATE = "user_activate"
     USER_DEACTIVATE = "user_deactivate"
-
+    
     # Company
     COMPANY_CREATE = "company_create"
     COMPANY_UPDATE = "company_update"
     COMPANY_DELETE = "company_delete"
-
+    
     # Financial
     INVOICE_CREATE = "invoice_create"
     INVOICE_UPDATE = "invoice_update"
@@ -47,14 +47,20 @@ class AuditAction(StrEnum):
     BILL_DELETE = "bill_delete"
     PAYMENT_RECEIVED = "payment_received"
     PAYMENT_SENT = "payment_sent"
-
+    
     # Settings
     SETTINGS_CHANGE = "settings_change"
     PERMISSION_CHANGE = "permission_change"
-
+    
     # Data export/import
     DATA_EXPORT = "data_export"
     DATA_IMPORT = "data_import"
+    
+    # Webhook
+    WEBHOOK_CREATE = "webhook_create"
+    WEBHOOK_UPDATE = "webhook_update"
+    WEBHOOK_DELETE = "webhook_delete"
+    WEBHOOK_TRIGGER = "webhook_trigger"
 
 
 class User(Base):

@@ -14,6 +14,7 @@ from app.schemas.webhook import (
     WebhookEndpointStats,
     WebhookEndpointUpdate,
 )
+from app.services.audit import AuditAction, AuditLogger
 from app.services.webhooks import WebhookManager
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
@@ -55,10 +56,9 @@ def create_webhook(
     )
 
     # Audit log
-    from app.services.audit import AuditLogger
     audit = AuditLogger(db)
     audit.log(
-        action=WebhookAction.WEBHOOK_CREATE,
+        action=AuditAction.WEBHOOK_CREATE,
         user_id=current_user.id,
         company_id=company_id,
         resource_type="webhook",
@@ -211,4 +211,4 @@ def get_webhook_stats(
     if not endpoint:
         raise HTTPException(status_code=404, detail="Webhook endpoint not found")
 
-    return stats
+    return manager.get_endpoint_stats(webhook_id)
